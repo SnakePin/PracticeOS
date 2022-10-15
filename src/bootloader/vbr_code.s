@@ -1,37 +1,40 @@
 [BITS 16]
-[ORG 0x7C00]
+;[ORG 0x7C00]
 
-jmp 0x0000:first_stage ; set cs
-%include "bootloader_shared.s"
+%include "defs.s"
 
-; NASM floors divisions but it's not documented
-%define LEN_TO_LBA_SECTOR(len) (len % LBA_SECTOR_SIZE == 0 ? len/LBA_SECTOR_SIZE : len/LBA_SECTOR_SIZE + 1)
-%define ADDR_TO_LBA_SECTOR(addr) (addr/LBA_SECTOR_SIZE)
-%define ADDR_TO_LBA_SECTOR_OFFSET(addr) (addr%LBA_SECTOR_SIZE)
+; BEGIN EXTERN DECLARATIONS
+extern vga_clear_scr
+extern vga_print_cstr
+extern lba_send_transfer_packet
+extern lba_extension_check
+extern __vbr_actual_size$ ; Defined by linker
+; END EXTERN DECLARATIONS
 
+[SECTION .data]
 ; BEGIN VARIABLE DEFINITIONS
 cstring_def FAIL_LBA_READ, 'LBA read fail!'
 BOOT_DISK_ID_VAR db 0x00
 VBR_LBA_ADDRESS_L_VAR dw 0x0000 ; Our LBA address
 VBR_LBA_ADDRESS_H_VAR dw 0x0000
-; END VARIABLE DEFINITIONS
-
-; BEGIN CONSTANT DEFINITIONS
-VBR_SECTORS_TO_LOAD EQU LEN_TO_LBA_SECTOR(VBR_ACTUAL_SIZE)-1 ; -1 cause the first sector is already loaded
-LBA_SECTOR_SIZE EQU 512    ; Is this standard?
-VBR_ADDRESS EQU 0x7C00     ; VBR also expects to be at 0x7c00
-STACK_SEGMENT EQU 0x50     ; First free memory
-STACK_SIZE EQU 0x6000      ; 24KiB
-; END CONSTANT DEFINITIONS
-
-; LBA Transfer Packet must be aligned to 4 bytes
-align 4
+align 4 ; LBA Transfer Packet must be aligned to 4 bytes
 lba_xfer_pkt:
     istruc lba_transfer_packet_t 
         at ltp_size, db 16 
         at ltp_reserved, db 0
     iend
+; END VARIABLE DEFINITIONS
 
+; BEGIN CONSTANT DEFINITIONS
+VBR_SECTORS_TO_LOAD EQU LEN_TO_LBA_SECTOR(VBR_ACTUAL_SIZE)-1 ; -1 cause the first sector is already loaded
+STACK_SEGMENT EQU 0x50     ; First free memory
+STACK_SIZE EQU 0x6000      ; 24KiB
+; END CONSTANT DEFINITIONS
+
+[SECTION .text]
+global _entry
+_entry:
+    jmp 0x0000:first_stage ; fix cs
 ; DS:SI = PTE in the MBR, DL = Boot Disk ID
 first_stage:
     .initialize_stack:
@@ -69,8 +72,8 @@ first_stage:
 
 ; String at DS:SI
 print_and_halt:
-    call clear_scr_vga
-    call print_cstr_vga
+    call vga_clear_scr
+    call vga_print_cstr
     .halt:
     cli
     hlt
@@ -81,6 +84,7 @@ print_and_halt:
 %error "VBR First stage must be within the first 512 bytes"
 %endif
 
+[SECTION .data2]
 ; BEGIN VARIABLE DEFINITIONS, STAGE2
 cstring_def VBR_LOADED, 'VBR successfully booted.'
 cstring_def FAIL_KERNEL_READ, 'Unknown error while trying to read kernel from the disk!'
@@ -97,6 +101,7 @@ KERNEL_LOAD_OFF EQU 0x0000
 ; We might have to write the rest of the VBR in C if we're going to implement an FS
 ; But for now, we'll load the kernel from 0xFFFF offset in the partition
 ; Size of the kernel in sectors is a LE UInt16 at 0xFFFD, perhaps that was a bad idea?
+[SECTION .text2]
 second_stage:
     .blind_a20_activate: ; TODO: Write proper code to do this
     mov ax, 0x2401
@@ -151,10 +156,9 @@ second_stage:
     rep movsw
     
     mov si, VBR_LOADED
-    call clear_scr_vga
-    call print_cstr_vga
+    call vga_clear_scr
+    call vga_print_cstr
     jmp $
-
 
 VBR_ACTUAL_SIZE EQU ($ - $$)
 %if VBR_ACTUAL_SIZE > 65536

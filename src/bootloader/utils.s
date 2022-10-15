@@ -1,34 +1,15 @@
-; BEGIN CONSTANT DEFINITIONS
-MBR_PT_OFFSET EQU 446      ; MBR partition table offset
-MBR_PTE_SIZE EQU 16        ; MBR partition table entry size
-; END CONSTANT DEFINITIONS
+[BITS 16]
 
-; BEGIN STRUCT DEFINITIONS
-struc lba_transfer_packet_t
-    ltp_size: resb 1
-    ltp_reserved: resb 1
-    ltp_num_sector: resw 1
-    ltp_mem_offset: resw 1
-    ltp_mem_segment: resw 1
-    ltp_lba_addr_lower32_l: resw 1
-    ltp_lba_addr_lower32_h: resw 1
-    ltp_lba_addr_higher32_l: resw 1
-    ltp_lba_addr_higher32_h: resw 1
-endstruc
-struc mbr_pte_t
-    mp_status: resb 1
-    mp_CHSFirst: resb 3
-    mp_type: resb 1
-    mp_CHSLast: resb 3
-    mp_lba_first_l: resw 1
-    mp_lba_first_h: resw 1
-    mp_sector_count_l: resw 1
-    mp_sector_count_h: resw 1
-endstruc
-; END STRUCT DEFINITIONS
+%include "defs.s"
 
+global vga_clear_scr
+global vga_print_cstr
+global lba_send_transfer_packet
+global lba_extension_check
+
+[SECTION .text]
 ; No return value, no arguments
-clear_scr_vga:
+vga_clear_scr:
     pusha
     push es
     mov ax, 0xB800
@@ -42,7 +23,7 @@ clear_scr_vga:
     ret
 
 ; No return value, cstring @ DS:SI
-print_cstr_vga:
+vga_print_cstr:
     pusha
     xor di, di
     mov dh, 0x07 ; Color attribute for all chars
@@ -80,8 +61,3 @@ lba_extension_check:
     setnc al
     xor ah, ah
     ret
-
-%macro cstring_def 2
-    %1 db %2, 0x00
-    %1_LEN EQU $-%1
-%endmacro

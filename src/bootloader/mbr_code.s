@@ -1,10 +1,17 @@
 [BITS 16]
-[ORG 0]
+;[ORG 0]
 ; nasm doesn't support changing base mid-program, so we'll set it to 0 and set segment registers accordingly
 
-jmp MBR_ORIG_SEGMENT:first_stage ; set cs
-%include "bootloader_shared.s"
+%include "defs.s"
 
+; BEGIN EXTERN DECLARATIONS
+extern vga_clear_scr
+extern vga_print_cstr
+extern lba_send_transfer_packet
+extern lba_extension_check
+; END EXTERN DECLARATIONS
+
+[SECTION .data]
 ; BEGIN VARIABLE DEFINITIONS
 cstring_def BOOTING_VBR_MSG, 'Booting VBR...'
 cstring_def FAIL_NO_LBA_EXTENSION, 'System has no LBA support!'
@@ -12,25 +19,25 @@ cstring_def FAIL_LBA_READ, 'LBA read fail!'
 cstring_def FAIL_NO_BOOTABLE_FOUND, 'No active partition found!'
 BOOT_DISK_ID_VAR db 0x00
 MBR_BOOT_PTE_VAR dw 0x0000
-; END VARIABLE DEFINITIONS
-
-; BEGIN CONSTANT DEFINITIONS
-MBR_SIZE EQU 512
-MBR_COPY_SEGMENT EQU 0x50  ; First free memory address, right after BDA
-MBR_ORIG_SEGMENT EQU 0x7C0 ; Original MBR segment
-VBR_ADDRESS EQU 0x7C00     ; VBR also expects to be at 0x7c00
-STACK_SEGMENT EQU 0xBC0    ; 16KiB past the original MBR segment
-STACK_SIZE EQU 0x4000      ; 16KiB
-; END CONSTANT DEFINITIONS
-
-; LBA Transfer Packet must be aligned to 4 bytes
-align 4
+align 4 ; LBA Transfer Packet must be aligned to 4 bytes
 lba_xfer_pkt:
     istruc lba_transfer_packet_t 
         at ltp_size, db 16 
         at ltp_reserved, db 0
     iend
+; END VARIABLE DEFINITIONS
 
+; BEGIN CONSTANT DEFINITIONS
+MBR_COPY_SEGMENT EQU 0x50  ; First free memory address, right after BDA
+MBR_ORIG_SEGMENT EQU 0x7C0 ; Original MBR segment
+STACK_SEGMENT EQU 0xBC0    ; 16KiB past the original MBR segment
+STACK_SIZE EQU 0x4000      ; 16KiB
+; END CONSTANT DEFINITIONS
+
+[SECTION .text]
+global _entry
+_entry:
+    jmp MBR_ORIG_SEGMENT:first_stage ; fix cs
 first_stage:
     .initialize_stack:
     cli ; Maybe disable NMIs here too?
@@ -80,11 +87,11 @@ second_stage:
     jz .error
     .lba_read_success:
     mov si, BOOTING_VBR_MSG
-    call print_cstr_vga
+    call vga_print_cstr
     jmp third_stage ; noreturn
     .error:
-    call clear_scr_vga
-    call print_cstr_vga
+    call vga_clear_scr
+    call vga_print_cstr
     .halt: ; Maybe shutdown here instead?
     cli
     hlt
