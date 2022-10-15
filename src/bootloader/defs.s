@@ -13,7 +13,6 @@ LBA_SECTOR_SIZE EQU 512    ; Is this standard?
 %define ADDR_TO_LBA_SECTOR_OFFSET(addr) (addr%LBA_SECTOR_SIZE)
 %macro cstring_def 2
     %1 db %2, 0x00
-    %1_LEN EQU $-%1
 %endmacro
 ; END MACRO DEFINITIONS
 

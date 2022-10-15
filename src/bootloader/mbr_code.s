@@ -125,8 +125,3 @@ mbr_get_vbr_lba:
     mov cx, word [bx + mp_lba_first_l]
     mov dx, word [bx + mp_lba_first_h]
     ret
-
-; Assert, because this is where the MBR partition table starts.
-%if ($ - $$) > 446
-%error "MBR Bootstrap code is larger than 446 bytes"
-%endif

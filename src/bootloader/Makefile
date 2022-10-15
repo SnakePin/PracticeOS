@@ -1,26 +1,21 @@
 OUTPREFIX	= ../../out/bootloader
-AS			= nasm
+AS			= nasm # nasm my beloved, GAS requires section tricks to generate 16bit code
 LD			= ld
 ASFLAGS		= -f elf -g -F stabs
-LDFLAGS		= -s
+LDFLAGS		= 
+ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o
 
 all: ensure_outprefix --build convert_elf
 --build: vbr.elf mbr.elf
 
-mbr_code.o: mbr_code.s
+$(ASM_OBJS): %.o: %.s
 	$(AS) $(ASFLAGS) "$<" -o "$(OUTPREFIX)/$@"
 
-vbr_code.o: vbr_code.s
-	$(AS) $(ASFLAGS) "$<" -o "$(OUTPREFIX)/$@"
-
-utils.o: utils.s
-	$(AS) $(ASFLAGS) "$<" -o "$(OUTPREFIX)/$@"
-
-vbr.elf: vbr_code.o utils.o
-	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUTPREFIX)/$@" "$(OUTPREFIX)/vbr_code.o" "$(OUTPREFIX)/utils.o"
+vbr.elf: vbr_loader.o vbr_stage2.o utils.o
+	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
 
 mbr.elf: mbr_code.o utils.o
-	$(LD) $(LDFLAGS) -T mbr_linker.ld -o "$(OUTPREFIX)/$@" "$(OUTPREFIX)/mbr_code.o" "$(OUTPREFIX)/utils.o"
+	$(LD) $(LDFLAGS) -T mbr_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
 
 convert_elf: --build
 	objcopy -O binary "$(OUTPREFIX)/vbr.elf" "$(OUTPREFIX)/vbr_raw.bin" 

@@ -4,12 +4,13 @@ ENTRY(_entry)
 
 MEMORY
 {
-    /* Origin at 0, we'll use segment registers instead */
-    SEG1 (rwx) : ORIGIN = 0x0000, LENGTH = 1M
+    SEG1 (rwx) : ORIGIN = 0, LENGTH = 1M
 }
 
 SECTIONS
 {
+    /* Origin at 0, we'll use segment registers instead */
+    __executable_start = .;
     .text :
     {
         *(.init .text)
@@ -19,4 +20,5 @@ SECTIONS
         *(.data)
     }
     /DISCARD/ : {*(*)}
+    ASSERT((. - __executable_start) <= 446, "Error: MBR is larger than 446 bytes")
 }

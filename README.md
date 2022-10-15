@@ -1,11 +1,17 @@
 Assembly files are compiled using NASM, C files are compiled using GCC.
-You need to install dotnet-script, you can use the following command to do so:
+Installing dependencies:
 ```sh
+sudo apt-get install -y dotnet-runtime-6.0
 dotnet tool install -g dotnet-script
+cat << EOF >> ~/.profile
+# Add .NET Core SDK tools
+export PATH="\$PATH:$HOME/.dotnet/tools"
+EOF
+. ~/.profile
+sudo rm -rf ~/.cache
 ```
 
 To build:
 ```
-./compile_all.ps1
-dotnet script mkdisk.cs
+make all
 ```
