@@ -49,7 +49,7 @@ vbr_second_stage:
     push bx
     push cx
     add bx, ADDR_TO_LBA_SECTOR(KERNEL_IMAGE_LEN_OFFSET)
-    setc cl ; same as adc cx, 0
+    adc cx, 0
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_l], bx
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], cx
     mov word [lba_xfer_pkt + ltp_num_sector], 1
@@ -64,7 +64,7 @@ vbr_second_stage:
     pop bx ; VBR_LBA_ADDRESS_L_VAR
     pop ax ; BOOT_DISK_ID_VAR
     add bx, ADDR_TO_LBA_SECTOR(KERNEL_IMAGE_OFFSET)
-    setc cl ; same as adc cx, 0
+    adc cx, 0
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_l], bx
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], cx
     mov bx, word [DISK_TEMP_BUFFER + ADDR_TO_LBA_SECTOR_OFFSET(KERNEL_IMAGE_LEN_OFFSET)]

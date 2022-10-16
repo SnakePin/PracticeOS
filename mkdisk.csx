@@ -117,10 +117,11 @@ using (FileStream fs = File.Open(diskOutFile, FileMode.Create, FileAccess.Write,
     fs.Write(vbrBytes);
 
     //Kernel, TODO: Make this a file instead
-    fs.Seek(partitionBase+0xFFFF-2, SeekOrigin.Begin);
+    fs.Seek(partitionBase+0xFFFE, SeekOrigin.Begin);
+    //This calculation is only valid if the kernel is aligned to LBASectorSize boundary
     UInt16 kernelSectorSpan = (ushort)Math.Ceiling((double)kernelBytes.Length / LBASectorSize);
     fs.Write(UInt16ToLEBytes(kernelSectorSpan));
-    fs.Write(kernelBytes);
+    fs.Write(kernelBytes); //0x10000
 
     //Partition 1's last byte
     fs.Seek(partitionBase+partitionSize-1, SeekOrigin.Begin);

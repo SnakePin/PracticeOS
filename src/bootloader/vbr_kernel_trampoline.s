@@ -1,4 +1,4 @@
-[BITS 32]
+[BITS 16]
 
 %include "defs.s"
 
@@ -33,14 +33,15 @@ GDT_SIZE EQU ($ - global_descriptor_table)
 [SECTION .text_stage2]
 global vbr_kernel_trampoline:function
 vbr_kernel_trampoline:
-    ; This is very hacky as in, the CPU is in 16bit mode here but the instructions are for 32bit mode
     call disable_all_interrupts
     lgdt [gdt_descriptor]
     mov eax, cr0
     or eax, 1
     mov cr0, eax
-    jmp 0x08:.32bit
-    .32bit:
+    jmp 0x08:vbr_kernel_trampoline32
+
+[BITS 32]
+vbr_kernel_trampoline32:
     ; We're in 32bit protected mode here
     mov eax, 0x10
     mov ds, eax

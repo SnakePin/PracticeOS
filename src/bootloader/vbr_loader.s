@@ -63,25 +63,28 @@ first_stage:
     mov word [VBR_LBA_ADDRESS_L_VAR], bx
     mov word [VBR_LBA_ADDRESS_H_VAR], cx
     mov byte [BOOT_DISK_ID_VAR], dl
-    push dx
+    .check_vbr_length:
+    mov ax, __vbr_size
+    cmp ax, LBA_SECTOR_SIZE
+    jle .stage2_loaded ; If the VBR fits in the first sector, we don't have to load anything
     .load_rest_of_vbr:
     inc bx
+    adc cx, 0
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_l], bx
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], cx
-    mov dx, __vbr_size
-    shr dx, ilog2e(LBA_SECTOR_SIZE) ; Divide by sector size
-    jnc .no_carry
-    inc dx ; add the last sector if the code doesn't use the whole sector
-    .no_carry:
-    dec dx ; decrease because the first sector is already loaded
-    test dx, dx
-    jz .stage2_loaded ; If the VBR fits in the first sector, we don't have to load anything
-    mov word [lba_xfer_pkt + ltp_num_sector], dx
+    xor dx, dx
+    mov bx, LBA_SECTOR_SIZE
+    div bx
+    test dx,dx
+    jz .no_remainder
+    inc ax ; Add the last sector if there is remainder
+    .no_remainder:
+    dec ax ; Decrease, because the first sector is already loaded
+    mov word [lba_xfer_pkt + ltp_num_sector], ax
     mov word [lba_xfer_pkt + ltp_mem_offset], VBR_ADDRESS + LBA_SECTOR_SIZE
     mov word [lba_xfer_pkt + ltp_mem_segment], 0
+    mov al, byte [BOOT_DISK_ID_VAR]
     mov si, lba_xfer_pkt
-    pop dx ; BOOT_DISK_ID_VAR
-    mov al, dl
     call lba_send_transfer_packet
     test al, al
     mov si, FAIL_LBA_READ
