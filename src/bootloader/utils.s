@@ -2,10 +2,12 @@
 
 %include "defs.s"
 
-global vga_clear_scr
-global vga_print_cstr
-global lba_send_transfer_packet
-global lba_extension_check
+global vga_clear_scr:function
+global vga_print_cstr:function
+global lba_send_transfer_packet:function
+global lba_extension_check:function
+global disable_all_interrupts:function
+global enable_all_interrupts:function
 
 [SECTION .text]
 ; No return value, no arguments
@@ -60,4 +62,25 @@ lba_extension_check:
     popa
     setnc al
     xor ah, ah
+    ret
+
+; Apparently CMOS RTC uses port 0x70 for indexing and expects a read at 0x71
+disable_all_interrupts:
+    cli
+    push ax
+    in al, 0x70
+    and al, 0x7F
+    out 0x70, al
+    in al, 0x71
+    pop ax
+    ret
+
+enable_all_interrupts:
+    sti
+    push ax
+    in al, 0x70
+    or al, 0x80
+    out 0x70, al
+    in al, 0x71
+    pop ax
     ret

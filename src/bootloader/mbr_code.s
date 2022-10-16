@@ -9,6 +9,8 @@ extern vga_clear_scr
 extern vga_print_cstr
 extern lba_send_transfer_packet
 extern lba_extension_check
+extern disable_all_interrupts
+extern enable_all_interrupts
 ; END EXTERN DECLARATIONS
 
 [SECTION .data]
@@ -30,23 +32,23 @@ lba_xfer_pkt:
 ; BEGIN CONSTANT DEFINITIONS
 MBR_COPY_SEGMENT EQU 0x50  ; First free memory address, right after BDA
 MBR_ORIG_SEGMENT EQU 0x7C0 ; Original MBR segment
-STACK_SEGMENT EQU 0xBC0    ; 16KiB past the original MBR segment
-STACK_SIZE EQU 0x4000      ; 16KiB
+STACK_SEGMENT EQU 0x70     ; 512bytes past the MBR copy
+STACK_SIZE EQU 0x6000      ; 24KiB
 ; END CONSTANT DEFINITIONS
 
 [SECTION .text]
-global _entry
+global _entry:function
 _entry:
     jmp MBR_ORIG_SEGMENT:first_stage ; fix cs
 first_stage:
     .initialize_stack:
-    cli ; Maybe disable NMIs here too?
+    call disable_all_interrupts
     mov ax, STACK_SEGMENT
     mov ss, ax
     mov ax, STACK_SIZE
     mov sp, ax
     mov bp, sp
-    sti
+    call enable_all_interrupts
     .copy_mbr:
     xor si, si
     xor di, di

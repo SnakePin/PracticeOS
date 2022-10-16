@@ -4,6 +4,12 @@ MBR_PTE_SIZE EQU 16        ; MBR partition table entry size
 MBR_SIZE EQU 512           ; Size of the MBR
 VBR_ADDRESS EQU 0x7C00     ; VBR also expects to be at 0x7c00
 LBA_SECTOR_SIZE EQU 512    ; Is this standard?
+; KERNEL DEFINITIONS
+KERNEL_IMAGE_LEN_OFFSET EQU 0xFFFD
+KERNEL_IMAGE_OFFSET EQU 0xFFFF
+KERNEL_LOAD_SEG EQU 0x17BF ; About 64KiB past the VBR
+KERNEL_LOAD_OFF EQU 0x0000
+KERNEL_LOAD_FLAT_ADDR EQU (KERNEL_LOAD_SEG*16+KERNEL_LOAD_OFF)
 ; END CONSTANT DEFINITIONS
 
 ; BEGIN MACRO DEFINITIONS
@@ -37,5 +43,12 @@ struc mbr_pte_t
     mp_lba_first_h: resw 1
     mp_sector_count_l: resw 1
     mp_sector_count_h: resw 1
+endstruc
+struc gdt_entry_t
+    gdtr_limit: resw 1
+    gdtr_base: resb 3
+    gdtr_access: resb 1
+    gdtr_flags_and_limit17_20: resb 1
+    gdtr_base_25_32: resb 1
 endstruc
 ; END STRUCT DEFINITIONS

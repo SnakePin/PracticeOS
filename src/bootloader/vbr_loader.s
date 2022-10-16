@@ -11,6 +11,8 @@ extern lba_send_transfer_packet
 extern lba_extension_check
 extern __vbr_size ; Defined by linker, this is not an address! It's a constant
 extern vbr_second_stage
+extern disable_all_interrupts
+extern enable_all_interrupts
 ; END EXTERN DECLARATIONS
 
 [SECTION .init_data]
@@ -26,12 +28,12 @@ lba_xfer_pkt:
         at ltp_reserved, db 0
     iend
 ; Stage 2 uses these variables
-global FAIL_LBA_READ
-global BOOT_DISK_ID_VAR
-global VBR_LBA_ADDRESS_L_VAR
-global VBR_LBA_ADDRESS_H_VAR
-global lba_xfer_pkt
-global print_and_halt
+global FAIL_LBA_READ:data
+global BOOT_DISK_ID_VAR:data
+global VBR_LBA_ADDRESS_L_VAR:data
+global VBR_LBA_ADDRESS_H_VAR:data
+global lba_xfer_pkt:function
+global print_and_halt:function
 ; END VARIABLE DEFINITIONS
 
 ; BEGIN CONSTANT DEFINITIONS
@@ -40,19 +42,19 @@ STACK_SIZE EQU 0x6000      ; 24KiB
 ; END CONSTANT DEFINITIONS
 
 [SECTION .init_text]
-global _entry
+global _entry:function
 _entry:
     jmp 0x0000:first_stage ; fix cs
 ; DS:SI = PTE in the MBR, DL = Boot Disk ID
 first_stage:
     .initialize_stack:
-    cli ; Maybe disable NMIs here too?
+    call disable_all_interrupts
     mov ax, STACK_SEGMENT
     mov ss, ax
     mov ax, STACK_SIZE
     mov sp, ax
     mov bp, sp
-    sti
+    call enable_all_interrupts
     .save_parameters:
     mov bx, word [ds:si + mp_lba_first_l]
     mov cx, word [ds:si + mp_lba_first_h]
