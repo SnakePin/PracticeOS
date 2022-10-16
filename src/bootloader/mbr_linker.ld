@@ -11,14 +11,8 @@ SECTIONS
 {
     /* Origin at 0, we'll use segment registers instead */
     PROVIDE(__executable_start = .);
-    .text :
-    {
-        *(.init .text)
-    }
-    .data : 
-    {
-        *(.data)
-    }
+    .text : { *(.init_text) *(.text) }
+    .data : { *(.data) }
     __mbr_bootstrap_size = . - __executable_start;
 
     /* Stabs debugging sections.  */

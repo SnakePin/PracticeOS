@@ -15,9 +15,9 @@ extern disable_all_interrupts
 extern enable_all_interrupts
 ; END EXTERN DECLARATIONS
 
-[SECTION .init_data]
+[SECTION .data]
 ; BEGIN VARIABLE DEFINITIONS
-cstring_def FAIL_LBA_READ, 'LBA read fail!'
+cstring_def FAIL_LBA_READ, 'LBA read fail in VBR!'
 BOOT_DISK_ID_VAR db 0x00
 VBR_LBA_ADDRESS_L_VAR dw 0x0000 ; Our LBA address
 VBR_LBA_ADDRESS_H_VAR dw 0x0000
@@ -100,8 +100,3 @@ print_and_halt:
     cli
     hlt
     jmp .halt ; An NMI can bring the IP here
-
-; Assert, because the loader code must fit in the first sector
-%if ($ - $$) > 512
-%error "VBR First stage must be within the first 512 bytes"
-%endif

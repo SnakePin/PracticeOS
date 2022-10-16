@@ -6,7 +6,7 @@
 [SECTION .data_stage2]
 ; BEGIN VARIABLE DEFINITIONS, STAGE2
 cstring_def KERNEL_LOADED, 'Kernel loaded.'
-cstring_def FAIL_KERNEL_READ, 'Unknown error while trying to read kernel from the disk!'
+cstring_def FAIL_KERNEL_LEN, 'Kernel length is an invalid value!'
 ; END VARIABLE DEFINITIONS, STAGE2
 
 ; BEGIN CONSTANT DEFINITIONS, STAGE2
@@ -26,7 +26,7 @@ extern VBR_LBA_ADDRESS_H_VAR
 extern lba_xfer_pkt
 extern print_and_halt
 ; Stage 2 trampoline
-extern vbr_kernel_trampoline
+extern vbr_stage2_trampoline
 ; END EXTERN DECLARATIONS
 
 ; We might have to write the rest of the VBR in C if we're going to implement an FS
@@ -41,7 +41,6 @@ vbr_second_stage:
     mov ax, 0x2401
     int 0x15
     .read_kernel_length_from_disk:
-    mov word [lba_xfer_pkt + ltp_mem_segment], 0 ; flat memory
     mov al, byte [BOOT_DISK_ID_VAR]
     mov bx, word [VBR_LBA_ADDRESS_L_VAR]
     mov cx, word [VBR_LBA_ADDRESS_H_VAR]
@@ -54,6 +53,7 @@ vbr_second_stage:
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], cx
     mov word [lba_xfer_pkt + ltp_num_sector], 1
     mov word [lba_xfer_pkt + ltp_mem_offset], DISK_TEMP_BUFFER
+    mov word [lba_xfer_pkt + ltp_mem_segment], 0
     mov si, lba_xfer_pkt
     call lba_send_transfer_packet
     test al, al
@@ -68,25 +68,16 @@ vbr_second_stage:
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_l], bx
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], cx
     mov bx, word [DISK_TEMP_BUFFER + ADDR_TO_LBA_SECTOR_OFFSET(KERNEL_IMAGE_LEN_OFFSET)]
-    push bx
+    test bx, bx ; If the num_sector is 0, the length is invalid
+    mov si, FAIL_KERNEL_LEN
+    jz print_and_halt
     mov word [lba_xfer_pkt + ltp_num_sector], bx
-    mov word [lba_xfer_pkt + ltp_mem_offset], DISK_TEMP_BUFFER
+    mov word [lba_xfer_pkt + ltp_mem_offset], KERNEL_LOAD_OFF
+    mov word [lba_xfer_pkt + ltp_mem_segment], KERNEL_LOAD_SEG
     mov si, lba_xfer_pkt
     call lba_send_transfer_packet
     test al, al
     mov si, FAIL_LBA_READ
     jz print_and_halt
-    .move_kernel:
-    pop bx ; Length of the kernel in LBA sectors
-    xor ax, ax
-    mov ds, ax
-    mov ax, KERNEL_LOAD_SEG
-    mov es, ax
-    mov si, DISK_TEMP_BUFFER
-    add si, ADDR_TO_LBA_SECTOR_OFFSET(KERNEL_IMAGE_OFFSET)
-    mov di, KERNEL_LOAD_OFF
-    shl bx, ilog2e(LBA_SECTOR_SIZE) ; Multiply by sector size, doing this limits the kernel to 64KiB
-    mov cx, bx
-    rep movsb
     .load_kernel:
-    jmp vbr_kernel_trampoline
+    jmp vbr_stage2_trampoline

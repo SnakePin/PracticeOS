@@ -17,7 +17,7 @@ extern enable_all_interrupts
 ; BEGIN VARIABLE DEFINITIONS
 cstring_def BOOTING_VBR_MSG, 'Booting VBR...'
 cstring_def FAIL_NO_LBA_EXTENSION, 'System has no LBA support!'
-cstring_def FAIL_LBA_READ, 'LBA read fail!'
+cstring_def FAIL_LBA_READ, 'LBA read fail in MBR!'
 cstring_def FAIL_NO_BOOTABLE_FOUND, 'No active partition found!'
 BOOT_DISK_ID_VAR db 0x00
 MBR_BOOT_PTE_VAR dw 0x0000
@@ -36,7 +36,7 @@ STACK_SEGMENT EQU 0x70     ; 512bytes past the MBR copy
 STACK_SIZE EQU 0x6000      ; 24KiB
 ; END CONSTANT DEFINITIONS
 
-[SECTION .text]
+[SECTION .init_text]
 global _entry:function
 _entry:
     jmp MBR_ORIG_SEGMENT:first_stage ; fix cs

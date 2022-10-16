@@ -3,7 +3,7 @@ AS			= nasm # nasm my beloved, GAS requires section tricks to generate 16bit cod
 LD			= ld
 ASFLAGS		= -f elf -F stabs -g
 LDFLAGS		= 
-ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o vbr_kernel_trampoline.o
+ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o vbr_stage2_trampoline.o
 
 $(info $(shell mkdir -p $(OUTPREFIX)))
 
@@ -13,7 +13,7 @@ all: --build convert_elf
 $(ASM_OBJS): %.o: %.s
 	$(AS) $(ASFLAGS) "$<" -o "$(OUTPREFIX)/$@"
 
-vbr.elf: vbr_loader.o vbr_stage2.o utils.o vbr_kernel_trampoline.o
+vbr.elf: vbr_loader.o vbr_stage2.o utils.o vbr_stage2_trampoline.o
 	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
 
 mbr.elf: mbr_code.o utils.o
