@@ -48,10 +48,10 @@ struc mbr_pte_t
     mp_sector_count_h: resw 1
 endstruc
 struc gdt_entry_t
-    gdtr_limit: resw 1
-    gdtr_base: resb 3
-    gdtr_access: resb 1
-    gdtr_flags_and_limit17_20: resb 1
-    gdtr_base_25_32: resb 1
+    gdte_limit: resw 1
+    gdte_base: resb 3
+    gdte_access: resb 1
+    gdte_flags_and_limit17_20: resb 1
+    gdte_base_25_32: resb 1
 endstruc
 ; END STRUCT DEFINITIONS

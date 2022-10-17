@@ -5,8 +5,8 @@ CC			= gcc
 CFLAGS		= -m32 -ffreestanding -nostdlib -g -c -std=c11 -pedantic -o3
 ASFLAGS		= -f elf -F stabs -g
 LDFLAGS		= 
-ASM_OBJS	= entry.o
-C_OBJS		= main.o
+ASM_OBJS	= entry.o gdt.o interrupt_asm.o
+C_OBJS		= main.o vga.o interrupt_c.o
 
 $(info $(shell mkdir -p $(OUTPREFIX)))
 
@@ -19,7 +19,7 @@ $(ASM_OBJS): %.o: %.s
 $(C_OBJS): %.o: %.c
 	$(CC) $(CFLAGS) "$<" -o "$(OUTPREFIX)/$@"
 
-kernel.elf: entry.o main.o
+kernel.elf: entry.o gdt.o interrupt_asm.o interrupt_c.o main.o vga.o
 	$(LD) $(LDFLAGS) -T kernel_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
 
 convert_elf: --build

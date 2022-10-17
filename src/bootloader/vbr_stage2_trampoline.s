@@ -15,18 +15,18 @@ global_descriptor_table:
     istruc gdt_entry_t
     iend
     istruc gdt_entry_t ; Ring 0 Code
-        at gdtr_limit, dw 0xFFFF
-        at gdtr_base, db 0,0,0
-        at gdtr_access, db 0b1001_1010
-        at gdtr_flags_and_limit17_20, db 0b1100_1111
-        at gdtr_base_25_32, db 0x00
+        at gdte_limit, dw 0xFFFF
+        at gdte_base, db 0,0,0
+        at gdte_access, db 0b1001_1010
+        at gdte_flags_and_limit17_20, db 0b1100_1111
+        at gdte_base_25_32, db 0x00
     iend
     istruc gdt_entry_t ; Ring 0 Data
-        at gdtr_limit, dw 0xFFFF
-        at gdtr_base, db 0,0,0
-        at gdtr_access, db 0b1001_0010
-        at gdtr_flags_and_limit17_20, db 0b1100_1111
-        at gdtr_base_25_32, db 0x00
+        at gdte_limit, dw 0xFFFF
+        at gdte_base, db 0,0,0
+        at gdte_access, db 0b1001_0010
+        at gdte_flags_and_limit17_20, db 0b1100_1111
+        at gdte_base_25_32, db 0x00
     iend
 GDT_SIZE EQU ($ - global_descriptor_table)
 

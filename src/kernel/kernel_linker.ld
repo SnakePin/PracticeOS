@@ -4,12 +4,13 @@ ENTRY(_entry)
 
 MEMORY
 {
-    RAM (rwx) : ORIGIN = 0, LENGTH = 4096M
+    /* Our assembly files are not PIC, therefore our executable is not PIE */
+    RAM (rwx) : ORIGIN = 0x17BF0, LENGTH = 4096M
 }
 
 SECTIONS
 {
-    PROVIDE(__executable_start = .);
+    PROVIDE(__executable_start = 0x17BF0);
 
     /* Code */
     .text :
