@@ -9,10 +9,9 @@ bootloader:
 	$(MAKE) -j$(nproc) -C src/bootloader
 
 kernel:
-	mkdir -p out/kernel
-	touch out/kernel/kernel.bin
-#	$(MAKE) -j$(nproc) -C src/kernel
+	$(MAKE) -j$(nproc) -C src/kernel
 
 clean:
 	$(MAKE) -C src/bootloader clean
+	$(MAKE) -C src/kernel clean
 	rm -rf out/*
