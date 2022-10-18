@@ -36,7 +36,7 @@ STACK_SEGMENT EQU 0x70     ; 512bytes past the MBR copy
 STACK_SIZE EQU 0x6000      ; 24KiB
 ; END CONSTANT DEFINITIONS
 
-[SECTION .init_text]
+[SECTION .init]
 global _entry:function
 _entry:
     jmp MBR_ORIG_SEGMENT:first_stage ; fix cs

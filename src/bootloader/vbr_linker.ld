@@ -9,15 +9,16 @@ MEMORY
 
 SECTIONS
 {
-    PROVIDE(__executable_start = 0x7c00); /* . is at 0 before any sections are defined */
+    . = 0x7c00;
+    PROVIDE(__executable_start = .);
     /* Stage 1, must be able to access utils */
-    .text : { *(.init_text) *(.text) }
-    .data : { *(.data) }
+    .text ALIGN(1) : { *(.init) *(.text) }
+    .data ALIGN(1) : { *(.data) }
     ASSERT((. - __executable_start) <= 512, "Error: VBR loader is larger than 512 bytes")
     
     /* Stage 2 */
-    .text_stage2 : { *(.text_stage2) }
-    .data_stage2 : { *(.data_stage2) }
+    .text_stage2 ALIGN(1) : { *(.text_stage2) }
+    .data_stage2 ALIGN(1) : { *(.data_stage2) }
     __vbr_size = . - __executable_start;
     
     /* Stabs debugging sections.  */

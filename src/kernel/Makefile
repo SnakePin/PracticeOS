@@ -4,7 +4,7 @@ LD			= ld
 CC			= gcc
 CFLAGS		= -m32 -ffreestanding -nostdlib -g -c -std=c11 -pedantic -o3
 ASFLAGS		= -f elf -F stabs -g
-LDFLAGS		= 
+LDFLAGS		= --warn-section-align
 ASM_OBJS	= entry.o gdt.o interrupt_asm.o
 C_OBJS		= main.o vga.o interrupt_c.o
 

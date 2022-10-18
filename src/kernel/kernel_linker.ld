@@ -10,10 +10,9 @@ MEMORY
 
 SECTIONS
 {
-    PROVIDE(__executable_start = 0x17BF0);
-
+    . = 0x17BF0;
     /* Code */
-    .text :
+    .text ALIGN(1) :
     {
         *(.init)
         *(.text.unlikely .text.*_unlikely .text.unlikely.*)
@@ -23,22 +22,22 @@ SECTIONS
         *(SORT(.text.sorted.*))
         *(.text .stub .text.* .gnu.linkonce.t.*)
     }
+    SDAHCXZG = .;
 
     /* Read-only data */
-    .rodata : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
+    .rodata ALIGN(1) : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
 
     /* Initialized data */
-    .data : 
+    .data ALIGN(1) : 
     {
         *(.sdata .sdata.*)
         *(.got.plt) *(.got)
         *(.shdata)
         *(.data .data.* .gnu.linkonce.d.*)
-        PROVIDE(__data_end = .);
     }
 
     /* Uninitialized data */
-    .bss :
+    .bss ALIGN(1) :
     {
         *(.bss*)
         *(.sbss*)

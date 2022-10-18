@@ -41,7 +41,7 @@ STACK_SEGMENT EQU 0x50     ; First free memory
 STACK_SIZE EQU 0x6000      ; 24KiB
 ; END CONSTANT DEFINITIONS
 
-[SECTION .init_text]
+[SECTION .init]
 global _entry:function
 _entry:
     jmp 0x0000:first_stage ; fix cs
