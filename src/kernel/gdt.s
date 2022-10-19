@@ -12,27 +12,28 @@ struc gdt_entry_t
 endstruc
 
 [SECTION .text]
-; void load_gdt(void* gdt@ebp+12, size_t codeSegment@ebp+16, size_t dataSegment@ebp+20)
+; void load_gdt(void* gdt@ebp+8, size_t codeSegment@ebp+12, size_t dataSegment@ebp+16)
 load_gdt:
-    push eax
     push ebp
     mov ebp, esp
-    mov eax, dword [ebp+12]
+    push eax
+    mov eax, dword [ebp+8]
     lgdt [eax]
-    mov eax, dword [ebp+20]
-    mov ds, eax
-    mov es, eax
-    mov fs, eax
-    mov gs, eax
-    mov ss, eax
     mov eax, dword [ebp+16]
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    mov eax, dword [ebp+12]
     sub esp, 6
     mov dword [esp], .load_cs
     mov word [esp+4], ax
     jmp [esp] ; JMP m16:32
     .load_cs:
-    leave
+    add esp, 6
     pop eax
+    leave
     ret
 
 load_default_gdt:

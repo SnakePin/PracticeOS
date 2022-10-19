@@ -1,8 +1,17 @@
 #pragma once
 #include <stdint.h>
-__attribute__ ((cdecl)) void load_idt(void* idt);
-__attribute__ ((cdecl)) void generic_c_isr(uint32_t irq_nr, uint32_t error_code);
-__attribute__ ((cdecl)) void load_default_idt();
+#include "utils.h"
+
+CDECL_ATTR void load_idt(void* idt);
+CDECL_ATTR void load_default_idt();
+
+enum IDTGateTypes {
+    TaskGate = 0x05,
+    Interrupt16Bit = 0x06,
+    Trap16Bit = 0x07,
+    Interrupt32Bit = 0x0E,
+    Trap32Bit = 0x0F
+};
 
 struct IDTEntry32_t {
     uint16_t offset_l;
@@ -10,10 +19,10 @@ struct IDTEntry32_t {
     uint8_t  reserved;
     uint8_t  option_byte;
     uint16_t offset_h;
-} __attribute__((packed));
+} PACKED_ATTR;
 
 struct IDTDescriptor32_t {
     uint16_t size;
     uint32_t offset;
-} __attribute__((packed));
+} PACKED_ATTR;
 

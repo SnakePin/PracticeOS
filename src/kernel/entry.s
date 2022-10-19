@@ -11,7 +11,7 @@ global _entry:function
 _entry:
     call load_default_gdt
     call load_default_idt
-    ;call enable_all_interrupts
+    call enable_all_interrupts
     call kmain
     .halt:
     hlt

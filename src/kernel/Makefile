@@ -6,7 +6,7 @@ CFLAGS		= -m32 -ffreestanding -nostdlib -c -std=c11 -pedantic -o3 -Wall -gdwarf-
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 ASM_OBJS	= entry.o gdt.o interrupt_asm.o
-C_OBJS		= main.o vga.o interrupt_c.o
+C_OBJS		= main.o vga.o interrupt_c.o utils.o
 
 $(info $(shell mkdir -p $(OUTPREFIX)))
 
@@ -19,10 +19,11 @@ $(ASM_OBJS): %.o: %.s
 $(C_OBJS): %.o: %.c
 	$(CC) $(CFLAGS) "$<" -o "$(OUTPREFIX)/$@"
 
-kernel.elf: entry.o gdt.o interrupt_asm.o interrupt_c.o main.o vga.o
+kernel.elf: entry.o gdt.o interrupt_asm.o interrupt_c.o main.o vga.o utils.o
 	$(LD) $(LDFLAGS) -T kernel_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
 
 convert_elf: --build
+	# This doesn't put the .bss in the output file, we should write an elf loader in the BL instead.
 	objcopy -S -O binary "$(OUTPREFIX)/kernel.elf" "$(OUTPREFIX)/kernel.bin"
 
 clean:

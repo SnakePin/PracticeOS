@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "vga.h"
 
+//TODO: Remove hardcoded variables
 #define VGA_COLUMN 80
 #define VGA_ROW 25
 #define VGA_BUFFER 0xB8000
@@ -16,8 +17,6 @@ void vga_print_cstr(const char* cstr, uint8_t colorAttribute) {
 }
 
 void vga_clear_scr(uint8_t colorAttribute) {
-    //TODO: remove hardcoded variables
-    //Assuming 80*25
     for (size_t i = 0; i < VGA_COLUMN*VGA_ROW; i++)
     {
         vga_buffer[i] = (colorAttribute<<8);

@@ -3,6 +3,7 @@
 global disable_all_interrupts:function
 global enable_all_interrupts:function
 global load_idt:function
+global generic_asm_isr:function
 
 extern generic_c_isr
 
@@ -52,16 +53,6 @@ generic_asm_isr:
     je .has_error_code
     dec ecx
     jnz .loop1
-    jmp .no_error_code
-    .has_error_code:
-    push dword [ebp+8] ; error code
-    push eax ; interrupt number
-    call generic_c_isr
-    add esp, 8
-    popad
-    leave
-    add esp, 8
-    iret
     .no_error_code:
     push 0
     push eax ; interrupt number
@@ -70,6 +61,15 @@ generic_asm_isr:
     popad
     leave
     add esp, 4
+    iret
+    .has_error_code:
+    push dword [ebp+8] ; error code
+    push eax ; interrupt number
+    call generic_c_isr
+    add esp, 8
+    popad
+    leave
+    add esp, 8
     iret
 
 [SECTION .data]
