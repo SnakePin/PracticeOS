@@ -2,8 +2,8 @@ OUTPREFIX	= ../../out/kernel
 AS			= nasm
 LD			= ld
 CC			= gcc
-CFLAGS		= -m32 -ffreestanding -nostdlib -g -c -std=c11 -pedantic -o3
-ASFLAGS		= -f elf -F stabs -g
+CFLAGS		= -m32 -ffreestanding -nostdlib -c -std=c11 -pedantic -o3 -Wall -gdwarf-2
+ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 ASM_OBJS	= entry.o gdt.o interrupt_asm.o
 C_OBJS		= main.o vga.o interrupt_c.o

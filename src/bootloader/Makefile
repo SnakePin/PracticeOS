@@ -1,7 +1,7 @@
 OUTPREFIX	= ../../out/bootloader
 AS			= nasm # nasm my beloved, GAS requires section tricks to generate 16bit code
 LD			= ld
-ASFLAGS		= -f elf -F stabs -g
+ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o vbr_stage2_trampoline.o
 
