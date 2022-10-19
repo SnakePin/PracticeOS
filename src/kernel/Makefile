@@ -1,30 +1,34 @@
-OUTPREFIX	= ../../out/kernel
+OUT	= ../../out/kernel
+SRC = .
 AS			= nasm
 LD			= ld
 CC			= gcc
 CFLAGS		= -m32 -ffreestanding -nostdlib -c -std=c11 -pedantic -o3 -Wall -gdwarf-2
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
-ASM_OBJS	= entry.o gdt.o interrupt_asm.o
+
+ASM_OBJS	= entry.o gdt.o interrupt_asm.o ioport.o
 C_OBJS		= main.o vga.o interrupt_c.o utils.o
+ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
+C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
 
-$(info $(shell mkdir -p $(OUTPREFIX)))
+$(info $(shell mkdir -p $(OUT)))
 
-all: --build convert_elf
---build: kernel.elf
+.PHONY: all clean
+all: $(OUT)/kernel.bin
 
-$(ASM_OBJS): %.o: %.s
-	$(AS) $(ASFLAGS) "$<" -o "$(OUTPREFIX)/$@"
+$(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s
+	$(AS) $(ASFLAGS) "$<" -o "$@"
 
-$(C_OBJS): %.o: %.c
-	$(CC) $(CFLAGS) "$<" -o "$(OUTPREFIX)/$@"
+$(C_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.c
+	$(CC) $(CFLAGS) "$<" -o "$@"
 
-kernel.elf: entry.o gdt.o interrupt_asm.o interrupt_c.o main.o vga.o utils.o
-	$(LD) $(LDFLAGS) -T kernel_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
+$(OUT)/kernel.elf: $(ASM_OBJ_TARGETS) $(C_OBJ_TARGETS)
+	$(LD) $(LDFLAGS) -T kernel_linker.ld -o "$@" $(addprefix $(OUT)/, $^)
 
-convert_elf: --build
-	# This doesn't put the .bss in the output file, we should write an elf loader in the BL instead.
-	objcopy -S -O binary "$(OUTPREFIX)/kernel.elf" "$(OUTPREFIX)/kernel.bin"
+# This doesn't put the .bss in the output file, we should write an elf loader in the BL instead.
+$(OUT)/kernel.bin: $(OUT)/kernel.elf
+	objcopy -S -O binary "$<" "$@"
 
 clean:
-	rm -f $(OUTPREFIX)/*
+	rm -f $(OUT)/*

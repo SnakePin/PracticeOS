@@ -11,9 +11,9 @@ io_outx:
     push edx
     push eax
     push ecx
-    mov edx, word [ebp+8]
+    mov edx, dword [ebp+8]
     mov eax, dword [ebp+12]
-    mov ecx, byte [ebp+16]
+    mov ecx, dword [ebp+16]
     cmp ecx, 1
     je .1byte
     cmp ecx, 2
@@ -38,8 +38,8 @@ io_inx:
     push ebp
     mov ebp, esp
     push edx
-    mov edx, word [ebp+8]
-    mov eax, byte [ebp+12]
+    mov edx, dword [ebp+8]
+    mov eax, dword [ebp+12]
     cmp eax, 1
     je .1byte
     cmp eax, 2

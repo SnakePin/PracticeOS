@@ -1,27 +1,30 @@
-OUTPREFIX	= ../../out/bootloader
+OUT	= ../../out/bootloader
+SRC = .
 AS			= nasm # nasm my beloved, GAS requires section tricks to generate 16bit code
 LD			= ld
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
+
 ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o vbr_stage2_trampoline.o
+ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
+OBJCOPY_TARGETS = $(addprefix $(OUT)/, vbr.bin mbr.bin)
 
-$(info $(shell mkdir -p $(OUTPREFIX)))
+$(info $(shell mkdir -p $(OUT)))
 
-all: --build convert_elf
---build: vbr.elf mbr.elf
+.PHONY: all clean
+all: $(OUT)/vbr.bin $(OUT)/mbr.bin
 
-$(ASM_OBJS): %.o: %.s
-	$(AS) $(ASFLAGS) "$<" -o "$(OUTPREFIX)/$@"
+$(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s
+	$(AS) $(ASFLAGS) "$<" -o "$@"
 
-vbr.elf: vbr_loader.o vbr_stage2.o utils.o vbr_stage2_trampoline.o
-	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
+$(OUT)/vbr.elf: $(addprefix $(OUT)/, vbr_loader.o vbr_stage2.o utils.o vbr_stage2_trampoline.o)
+	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^)
 
-mbr.elf: mbr_code.o utils.o
-	$(LD) $(LDFLAGS) -T mbr_linker.ld -o "$(OUTPREFIX)/$@" $(addprefix $(OUTPREFIX)/, $^)
+$(OUT)/mbr.elf: $(addprefix $(OUT)/, mbr_code.o utils.o)
+	$(LD) $(LDFLAGS) -T mbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^)
 
-convert_elf: --build
-	objcopy -S -O binary "$(OUTPREFIX)/vbr.elf" "$(OUTPREFIX)/vbr_raw.bin" 
-	objcopy -S -O binary "$(OUTPREFIX)/mbr.elf" "$(OUTPREFIX)/mbr_raw.bin" 
+$(OBJCOPY_TARGETS): $(OUT)/%.bin: $(OUT)/%.elf
+	objcopy -S -O binary "$<" "$@"
 
 clean:
-	rm -f $(OUTPREFIX)/*
+	rm -f $(OUT)/*

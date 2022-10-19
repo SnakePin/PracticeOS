@@ -75,8 +75,8 @@ static void WriteMBRPTE(Stream strm, bool active, MBRPartitionTypes type, uint l
 }
 
 const string diskOutFile = "out/disk.img";
-const string mbrBootstrapPath = "out/bootloader/mbr_raw.bin";
-const string vbrFilePath = "out/bootloader/vbr_raw.bin";
+const string mbrBootstrapPath = "out/bootloader/mbr.bin";
+const string vbrFilePath = "out/bootloader/vbr.bin";
 const string kernelFilePath = "out/kernel/kernel.bin";
 const int MBRBootstrapEnd = 446;
 const int VBRMax = 522495; //522495 is the length of continuous memory right after the the MBR in RAM
