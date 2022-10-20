@@ -4,6 +4,8 @@
 
 CDECL_ATTR void load_idt(void* idt);
 CDECL_ATTR void load_default_idt();
+CDECL_ATTR void disable_all_interrupts();
+CDECL_ATTR void enable_all_interrupts();
 
 enum IDTGateTypes {
     TaskGate = 0x05,
@@ -25,4 +27,3 @@ struct IDTDescriptor32_t {
     uint16_t size;
     uint32_t offset;
 } PACKED_ATTR;
-

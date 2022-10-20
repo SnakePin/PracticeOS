@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
-#include "vga.h"
+#include "drivers/vga.h"
 
 //TODO: Remove hardcoded variables
 #define VGA_COLUMN 80

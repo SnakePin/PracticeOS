@@ -1,5 +1,5 @@
-OUT	= ../../out/bootloader
-SRC = .
+OUT			= ../../out/bootloader
+SRC			= .
 AS			= nasm # nasm my beloved, GAS requires section tricks to generate 16bit code
 LD			= ld
 ASFLAGS		= -f elf32 -gdwarf
@@ -9,12 +9,13 @@ ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o vbr_stage2_trampoline
 ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 OBJCOPY_TARGETS = $(addprefix $(OUT)/, vbr.bin mbr.bin)
 
-$(info $(shell mkdir -p $(OUT)))
-
-.PHONY: all clean
+.PHONY: all clean ensure_path
 all: $(OUT)/vbr.bin $(OUT)/mbr.bin
 
-$(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s
+ensure_path:
+	@mkdir -p $(OUT)
+
+$(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s | ensure_path
 	$(AS) $(ASFLAGS) "$<" -o "$@"
 
 $(OUT)/vbr.elf: $(addprefix $(OUT)/, vbr_loader.o vbr_stage2.o utils.o vbr_stage2_trampoline.o)
@@ -27,4 +28,4 @@ $(OBJCOPY_TARGETS): $(OUT)/%.bin: $(OUT)/%.elf
 	objcopy -S -O binary "$<" "$@"
 
 clean:
-	rm -f $(OUT)/*
+	rm -r $(OUT)/*
