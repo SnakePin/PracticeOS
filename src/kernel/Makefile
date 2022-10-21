@@ -9,7 +9,7 @@ LDFLAGS		= --warn-section-align
 INCLUDE		= $(SRC)/include
 
 ASM_OBJS	= entry.o gdt.o interrupt_asm.o ioport.o
-C_OBJS		= main.o interrupt_c.o utils.o drivers/vga.o
+C_OBJS		= main.o interrupt_c.o utils.o drivers/vga.o drivers/pic8259.o
 ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
 
