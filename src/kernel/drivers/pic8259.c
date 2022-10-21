@@ -15,7 +15,7 @@ void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset)
      * "Whenever a command is issued with A0 = 0 and D4 = 1, this is interpreted as Initialization Command
      * Word 1 (ICW1). ICW1 starts the initialization sequence during which the following automatically occur."
      */
-    union ICW1Union_t icw1 = {.raw = 0};
+    ICW1Union_t icw1 = {.raw = 0};
     icw1.ONE = 1;
     icw1.IC4 = 1; // Enable ICW4
     io_outx(PIC1_PORT0, icw1.raw, 1);
@@ -30,7 +30,7 @@ void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset)
     io_outx(PIC1_PORT1, 0x04, 1); // Slave at IR2, this is a bit field
     io_outx(PIC2_PORT1, 0x02, 1); // Slave IDI
 
-    union ICW4Union_t icw4 = {.raw = 0};
+    ICW4Union_t icw4 = {.raw = 0};
     icw4.microPM = 1; // 8086 mode
     io_outx(PIC1_PORT1, icw4.raw, 1);
     io_outx(PIC2_PORT1, icw4.raw, 1);
@@ -53,7 +53,7 @@ void pic8259_set_irq_status(uint8_t picIrqNum, uint8_t active)
 
 void pic8259_send_eoi(uint8_t picIrqNum, uint8_t isSpurious)
 {
-    union OCW2Union_t ocw2 = {.raw = 0};
+    OCW2Union_t ocw2 = {.raw = 0};
     ocw2.EOI = 1;
     ocw2.R = 1; // Automatic priority rotation enabled
 
@@ -83,7 +83,7 @@ uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum)
 
 uint8_t internal_read_isr(uint8_t picNum)
 {
-    union OCW3Union_t ocw3 = {.raw = 0};
+    OCW3Union_t ocw3 = {.raw = 0};
     ocw3.ONE = 1;
     ocw3.RR = 1;
     ocw3.RIS = 1;

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "utils.h"
 
 void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset);
 void pic8259_set_irq_status(uint8_t picIrqNum, uint8_t active);
@@ -17,7 +18,7 @@ uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum);
 #define PIC2_PORT1 (0xA1)
 
 // Bit field structs assume an LE system
-union ICW1Union_t
+typedef union
 {
     struct
     {
@@ -27,10 +28,10 @@ union ICW1Union_t
         uint8_t LTIM : 1;
         uint8_t ONE : 1; // MUST be set to 1
         uint8_t ZERO : 3;
-    };
+    } PACKED_ATTR;
     uint8_t raw;
-};
-union ICW4Union_t
+} ICW1Union_t;
+typedef union
 {
     struct
     {
@@ -40,10 +41,10 @@ union ICW4Union_t
         uint8_t BUFMS : 1; // 1 for master, 0 for slave
         uint8_t SFNM : 1; // special fully nested mode
         uint8_t ZERO : 3;
-    };
+    } PACKED_ATTR;
     uint8_t raw;
-};
-union OCW2Union_t
+} ICW4Union_t;
+typedef union
 {
     struct
     {
@@ -52,10 +53,10 @@ union OCW2Union_t
         uint8_t EOI : 1;
         uint8_t SL : 1;
         uint8_t R : 1;
-    };
+    } PACKED_ATTR;
     uint8_t raw;
-};
-union OCW3Union_t
+} OCW2Union_t;
+typedef union
 {
     struct
     {
@@ -67,6 +68,6 @@ union OCW3Union_t
         uint8_t SMM : 1;  // New value of SM register
         uint8_t ESMM : 1; // 1 for changing SM register
         uint8_t ZERO1 : 1;
-    };
+    } PACKED_ATTR;
     uint8_t raw;
-};
+} OCW3Union_t;
