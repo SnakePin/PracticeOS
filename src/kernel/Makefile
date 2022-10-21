@@ -27,7 +27,7 @@ $(C_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.c | ensure_path
 	$(CC) $(CFLAGS) "$<" -o "$@" $(INCLUDE:%=-I%)
 
 $(OUT)/kernel.elf: $(ASM_OBJ_TARGETS) $(C_OBJ_TARGETS) | ensure_path
-	$(LD) $(LDFLAGS) -T kernel_linker.ld -o "$@" $(addprefix $(OUT)/, $^)
+	$(LD) $(LDFLAGS) -T kernel_linker.ld -o "$@" $^
 
 # This doesn't put the .bss in the output file, we should write an elf loader in the BL instead.
 $(OUT)/kernel.bin: $(OUT)/kernel.elf | ensure_path
