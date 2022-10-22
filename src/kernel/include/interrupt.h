@@ -5,14 +5,38 @@
 typedef uint8_t IRQVectorNum_t;
 
 #define SYSCALL_INTERRUPT (0x80)
-#define PIC8259_IRQ_OFFSET (0x20)
-#define PIC8259_IRQ_COUNT (16)
-#define IS_PIC_INTERRUPT(x) ((x) >= PIC8259_IRQ_OFFSET && (x) < PIC8259_IRQ_OFFSET + PIC8259_IRQ_COUNT)
 
 CDECL_ATTR void load_idt(void* idt);
-CDECL_ATTR void load_default_idt();
+CDECL_ATTR void load_kernel_idt();
 CDECL_ATTR void disable_all_interrupts();
 CDECL_ATTR void enable_all_interrupts();
+
+enum ExceptionInterrupts {
+    DivideByZeroFault = 0x00,
+    DebugTrap = 0x01,
+    NonMaskableInterrupt = 0x02,
+    BreakpointTrap = 0x03,
+    OverflowTrap = 0x04,
+    BoundRangeExceededFault = 0x05,
+    InvalidOpcodeFault = 0x06,
+    DeviceNotAvailableFault = 0x07,
+    DoubleFaultAbort = 0x08,
+    CoprocessorSegmentOverrunFault = 0x09,
+    InvalidTSSFault = 0x0A,
+    SegmentNotPresentFault = 0x0B,
+    StackSegmentFault = 0x0C,
+    GeneralProtectionFault = 0x0D,
+    PageFault = 0x0E,
+    x87FPFault = 0x10,
+    AlignmentCheckFault = 0x11,
+    MachineCheckAbort = 0x12,
+    SIMDFPFault = 0x13,
+    VirtualizationFault = 0x14,
+    ControlProtectionFault = 0x15,
+    HypervisorInjectionFault = 0x1C,
+    VMMCommunicationFault = 0x1D,
+    SecurityFault = 0x1E
+};
 
 enum IDTGateTypes {
     TaskGate = 0x05,
@@ -22,7 +46,7 @@ enum IDTGateTypes {
     Trap32Bit = 0x0F
 };
 
-struct IDTEntry32_t {
+typedef struct {
     uint16_t offset_l;
     uint16_t segment;
     uint8_t  reserved;
@@ -36,11 +60,11 @@ struct IDTEntry32_t {
             uint8_t Present : 1;
         };
         uint8_t raw;
-    } option_byte;
+    } options;
     uint16_t offset_h;
-} PACKED_ATTR;
+} PACKED_ATTR IDTEntry32_t;
 
-struct IDTDescriptor32_t {
+typedef struct {
     uint16_t size;
     uint32_t offset;
-} PACKED_ATTR;
+} PACKED_ATTR IDTDescriptor32_t;

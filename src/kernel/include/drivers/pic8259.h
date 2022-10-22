@@ -17,6 +17,13 @@ uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum);
 #define PIC2_PORT0 (0xA0)
 #define PIC2_PORT1 (0xA1)
 
+#define PIC8259_RM_PIC1_IRQ_OFFSET (0x08)
+#define PIC8259_RM_PIC2_IRQ_OFFSET (0x70)
+
+#define PIC8259_CUSTOM_IRQ_COUNT (16)
+#define PIC8259_CUSTOM_IRQ_OFFSET (0x20)
+#define IS_VEC_PIC_INTERRUPT(x) IS_IN_RANGE(x, PIC8259_CUSTOM_IRQ_OFFSET, PIC8259_CUSTOM_IRQ_OFFSET+PIC8259_CUSTOM_IRQ_COUNT)
+
 // Bit field structs assume an LE system
 typedef union
 {

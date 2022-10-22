@@ -28,4 +28,4 @@ $(OBJCOPY_TARGETS): $(OUT)/%.bin: $(OUT)/%.elf
 	objcopy -S -O binary "$<" "$@"
 
 clean:
-	rm -r $(OUT)/*
+	@rm -rf $(OUT)/* || true

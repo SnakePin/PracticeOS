@@ -13,4 +13,4 @@ kernel:
 clean:
 	@$(MAKE) -C src/bootloader clean
 	@$(MAKE) -C src/kernel clean
-	rm -rf out/*
+	@rm -rf out/* || true

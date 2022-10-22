@@ -8,3 +8,5 @@ void* memset(void* ptr, int val, size_t num);
 #define PACKED_ATTR __attribute__((packed))
 #define SECTION_ATTR(x) __attribute__ ((section (#x)))
 #define MAKE_SEGMENT_SELECTOR(index, ti, rpl) (index<<3 | ti<<2 | rpl)
+#define IS_IN_RANGE(i, min, max) ((i >= min) && (i <= max))
+#define LINKER_VAR(x) (&x)
