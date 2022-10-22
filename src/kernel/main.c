@@ -8,10 +8,7 @@ void kmain()
 {
     // Interrupts are disabled on kmain() entry
     pic8259_configure(PIC8259_IRQ_OFFSET, PIC8259_IRQ_OFFSET+8);
-    for (size_t i = 0; i < 16; i++)
-    {
-        pic8259_set_irq_status(i, 1);
-    }
+    pic8259_set_disabled_irq_mask(0x0000); // Enable all IRs
     enable_all_interrupts();
 
     // TODO: Implement a way to switch back to real mode for using BIOS interrupts

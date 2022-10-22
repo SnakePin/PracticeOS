@@ -3,14 +3,14 @@
 #include "utils.h"
 
 void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset);
-void pic8259_set_irq_status(uint8_t picIrqNum, uint8_t active);
+uint16_t pic8259_get_disabled_irq_mask();
+void pic8259_set_disabled_irq_mask(uint16_t combinedIRQMask);
 void pic8259_send_eoi(uint8_t picIrqNum, uint8_t isSpurious);
 uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum);
 
 /*
- * A0 in the datasheet refers to the last bit of the port address,
- * Also, the datasheet doesn't specify which address lines
- * drive CS pins of PICs. I guess it's up to the chipset?
+ * A0 in the datasheet refers to the last bit of the port address.
+ * PCH datasheets show that the chipset emulates two 8259s at 0x20 and 0xA0 respectively
  */
 #define PIC1_PORT0 (0x20)
 #define PIC1_PORT1 (0x21)
