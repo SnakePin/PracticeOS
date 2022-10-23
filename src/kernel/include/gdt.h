@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include "utils.h"
 
-#define GDT_ENTRY_COUNT 4
-#define GDT_KERNEL_CS 0x08
-#define GDT_KERNEL_DS 0x10
-#define GDT_GATE16_CS 0x18
+#define GDT_ENTRY_COUNT 5
+#define GDT_ARRAY_SIZE (sizeof(GDTEntry32_t) * GDT_ENTRY_COUNT)
+#define GDT_KERNEL_CS (1*8)
+#define GDT_KERNEL_DS (2*8)
+#define GDT_GATE16_CS (3*8)
+#define GDT_GATE16_DS (4*8)
 
 typedef struct
 {

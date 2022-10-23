@@ -1,7 +1,6 @@
 #include "gdt.h"
 #include "utils.h"
 
-#define GDT_ARRAY_SIZE (sizeof(GDTEntry32_t) * GDT_ENTRY_COUNT)
 GDTDescriptor32_t gdtDescriptor;
 GDTEntry32_t gdtArray[GDT_ENTRY_COUNT];
 
@@ -43,4 +42,13 @@ void generate_kernel_gdt(GDTDescriptor32_t *pDesc, GDTEntry32_t *pEntryList)
     pEntryList[3].lmt_flg.limit_h4 = 0xF;
     pEntryList[3].lmt_flg.DB = 0; // 16bit
     pEntryList[3].lmt_flg.G = 0;  // byte limit granularity
+
+    /* Ring 0 16bit Data */
+    pEntryList[4].limit_l16 = 0xFFFF;
+    pEntryList[4].base_l16 = 0x00;
+    pEntryList[4].base_h_l8 = 0x00;
+    pEntryList[4].access.raw = 0x92; // Present, read/write data segment
+    pEntryList[4].lmt_flg.limit_h4 = 0xF;
+    pEntryList[4].lmt_flg.DB = 0; // 16bit
+    pEntryList[4].lmt_flg.G = 0;  // byte limit granularity
 }
