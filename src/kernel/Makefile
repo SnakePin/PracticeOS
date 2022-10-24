@@ -9,7 +9,7 @@ LDFLAGS		= --warn-section-align
 INCLUDE		= $(SRC)/include
 
 ASM_OBJS	= entry.o gdt_asm.o interrupt_asm.o ioport.o int_gate16/gate_kernel_code_asm.o
-C_OBJS		= main.o gdt_c.o interrupt_c.o utils.o drivers/vga.o drivers/pic8259.o int_gate16/gate_kernel_code_c.o
+C_OBJS		= main.o gdt_c.o interrupt_c.o utils.o drivers/vga.o drivers/pic8259.o int_gate16/gate_kernel_code_c.o memory/memory.o memory/firstfit.o
 ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
 
@@ -20,6 +20,7 @@ ensure_path:
 	@mkdir -p $(OUT)
 	@mkdir -p $(OUT)/drivers
 	@mkdir -p $(OUT)/int_gate16
+	@mkdir -p $(OUT)/memory
 
 $(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s | ensure_path
 	$(AS) $(ASFLAGS) "$<" -o "$@"
