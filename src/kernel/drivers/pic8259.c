@@ -9,7 +9,7 @@
  * As per the Intel PCH and ICH datasheets, this code will assume 2 PICs present with the slave connected to IR2 on master
  */
 
-uint8_t internal_read_isr(uint8_t picNum);
+static uint8_t read_isr(uint8_t picNum);
 
 void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset)
 {
@@ -81,10 +81,10 @@ uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum)
         picNum = 2;
         picIrqNum -= 8;
     }
-    return !(internal_read_isr(picNum) & (1 << picIrqNum));
+    return !(read_isr(picNum) & (1 << picIrqNum));
 }
 
-uint8_t internal_read_isr(uint8_t picNum)
+static uint8_t read_isr(uint8_t picNum)
 {
     OCW3Union_t ocw3 = {.raw = 0};
     ocw3.ONE = 1;

@@ -2,15 +2,6 @@
 #include <stdint.h>
 #include "utils.h"
 
-typedef uint8_t IRQVectorNum_t;
-
-#define SYSCALL_INTERRUPT (0x80)
-
-CDECL_ATTR void load_idt(void* idt);
-CDECL_ATTR void load_kernel_idt();
-CDECL_ATTR void disable_all_interrupts();
-CDECL_ATTR void enable_all_interrupts();
-
 enum ExceptionInterrupts {
     DivideByZeroFault = 0x00,
     DebugTrap = 0x01,
@@ -68,3 +59,13 @@ typedef struct {
     uint16_t size;
     uint32_t offset;
 } PACKED_ATTR IDTDescriptor32_t;
+
+typedef uint8_t IRQVectorNum_t;
+
+#define SYSCALL_INTERRUPT (0x80)
+
+CDECL_ATTR void load_idt(void* idt);
+CDECL_ATTR void load_kernel_idt();
+CDECL_ATTR void disable_all_interrupts();
+CDECL_ATTR void enable_all_interrupts();
+void generate_kernel_idt(IDTDescriptor32_t* pDesc, IDTEntry32_t* pEntryList);

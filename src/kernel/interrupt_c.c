@@ -5,8 +5,7 @@
 #include "drivers/pic8259.h"
 
 CDECL_ATTR void generic_c_isr(IRQVectorNum_t, uint32_t);
-void *generate_isr_stub(IRQVectorNum_t, void const *);
-void generate_kernel_idt(IDTDescriptor32_t* pDesc, IDTEntry32_t* pEntryList);
+static void *generate_isr_stub(IRQVectorNum_t, void const *);
 extern const void *const generic_asm_isr; // Linker variable, don't modify or dereference it!
 
 /* push 0xCCCCCCCC; push 0xCCCCCCCC; ret */
@@ -64,7 +63,7 @@ void generate_kernel_idt(IDTDescriptor32_t* pDesc, IDTEntry32_t* pEntryList)
     //TODO: Make traps and faults Trap32Bit
 }
 
-void *generate_isr_stub(IRQVectorNum_t vectorNumber, const void *const pRealHandler)
+static void *generate_isr_stub(IRQVectorNum_t vectorNumber, const void *const pRealHandler)
 {
     uint8_t *offset = &isrArray[vectorNumber * ISR_TEMPLATE_LEN];
     memcpy(offset, isrTemplate, ISR_TEMPLATE_LEN);
