@@ -49,5 +49,4 @@ vbr_stage2_trampoline32:
     mov fs, eax
     mov gs, eax
     mov ss, eax
-    mov esp, 0x00EFFFFF ; Appears to be a 14MiB guaranteed space
     jmp KERNEL_LOAD_FLAT_ADDR
