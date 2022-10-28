@@ -3,9 +3,9 @@
 #include "memory/memory.h"
 #include "memory/internal.h"
 
-static MemoryPhyAllocLink_t *phy_get_last_alloc_in_range(uintptr_t pointer, size_t size);
+static MemoryPhyAllocLink_t *phy_get_last_alloc_in_range(physical_ptr_t pointer, size_t size);
 
-static inline uint8_t rangeOverlapCheck(uintptr_t r1start, uintptr_t r1end, uintptr_t r2start, uintptr_t r2end)
+static inline uint8_t rangeOverlapCheck(physical_ptr_t r1start, physical_ptr_t r1end, physical_ptr_t r2start, physical_ptr_t r2end)
 {
     return IS_IN_RANGE(r1start, r2start, r2end)
         || IS_IN_RANGE(r1end, r2start, r2end)
@@ -13,12 +13,12 @@ static inline uint8_t rangeOverlapCheck(uintptr_t r1start, uintptr_t r1end, uint
         || IS_IN_RANGE(r2end, r1start, r1end);
 }
 
-uintptr_t phy_get_firstfit(size_t size)
+physical_ptr_t phy_get_firstfit(size_t size)
 {
     for (size_t i = 0; i < memory_MemoryMapEntryCount; i++)
     {
-        uintptr_t rangeEnd = memory_MemoryMapACPI[i].BaseAddress + memory_MemoryMapACPI[i].Length;
-        uintptr_t allocationTarget = memory_MemoryMapACPI[i].BaseAddress;
+        physical_ptr_t rangeEnd = memory_MemoryMapACPI[i].BaseAddress + memory_MemoryMapACPI[i].Length;
+        physical_ptr_t allocationTarget = memory_MemoryMapACPI[i].BaseAddress;
 
         if (memory_MemoryMapACPI[i].Type != (uint32_t)Usable) {
             // Skip reserved ranges
@@ -38,7 +38,7 @@ uintptr_t phy_get_firstfit(size_t size)
         MemoryPhyAllocLink_t *lastObstruction = NULL;
         do
         {
-            uintptr_t allocationTargetEnd = allocationTarget + size;
+            physical_ptr_t allocationTargetEnd = allocationTarget + size;
             if (allocationTargetEnd > rangeEnd)
             {
                 // Can't fit the allocation in this range
@@ -57,17 +57,17 @@ uintptr_t phy_get_firstfit(size_t size)
     continue_outer:
         continue;
     }
-    return 0;
+    return NULL;
 }
 
-static MemoryPhyAllocLink_t *phy_get_last_alloc_in_range(uintptr_t pointer, size_t size)
+static MemoryPhyAllocLink_t *phy_get_last_alloc_in_range(physical_ptr_t pointer, size_t size)
 {
     MemoryPhyAllocLink_t *lastLinkFound = NULL;
     MemoryPhyAllocLink_t *currentLink = memory_PhyAllocListRoot.Next;
     while (currentLink != NULL)
     {
-        uintptr_t pointerLast = pointer + size - 1;
-        uintptr_t curLinkRangeLast = currentLink->BaseAddress + currentLink->Length - 1;
+        physical_ptr_t pointerLast = pointer + size - 1;
+        physical_ptr_t curLinkRangeLast = currentLink->BaseAddress + currentLink->Length - 1;
         if (rangeOverlapCheck(currentLink->BaseAddress, curLinkRangeLast, pointer, pointerLast))
         {
             if (lastLinkFound == NULL || lastLinkFound->BaseAddress < currentLink->BaseAddress)

@@ -25,7 +25,8 @@ static char *itoa_custom(int num, int radix)
         negative = 1;
         num = -num;
     }
-    else if(num == 0) {
+    else if (num == 0)
+    {
         buf[--i] = '0';
     }
 
@@ -55,25 +56,38 @@ void kmain()
     vga_clear_scr(0x17);
     vga_print_cstr(0, lineCounter++, "Kernel is booted", 0x17);
 
-    for (size_t currentMib = 4; currentMib <= 16; currentMib+=4)
+    for (size_t currentMib = 16; currentMib <= 64; currentMib += 16)
     {
         uintptr_t pointers[4];
         for (size_t j = 0; j < 4; j++)
         {
-            uint32_t columnCounter = 0;
-            pointers[j] = memory_phy_allocate(1024*1024*currentMib);
-            char* mib = itoa_custom(currentMib, 10);
+            size_t allocSize = 1024 * 1024 * currentMib;
+            pointers[j] = memory_phy_allocate(allocSize);
+            if (pointers[j] == PHY_NULL)
+            {
+                vga_print_cstr(0, lineCounter++, "Allocation failed!", 0x17);
+                continue;
+            }
+            memset((void *)pointers[j], 0xDA, allocSize);
 
+            uint32_t columnCounter = 0;
+            char *mib = itoa_custom(currentMib, 10);
             vga_print_cstr(columnCounter, lineCounter, mib, 0x17);
-            columnCounter+=strlen(mib);
+            columnCounter += strlen(mib);
 
             vga_print_cstr(columnCounter, lineCounter, "MiB @ 0x", 0x17);
-            columnCounter+=8;
+            columnCounter += 8;
 
-            char* hex = itoa_custom(pointers[j], 16);
+            char *hex = itoa_custom(pointers[j], 16);
             vga_print_cstr(columnCounter, lineCounter++, hex, 0x17);
         }
-        for (size_t j = 0; j < 4; j++) memory_phy_free(pointers[j]);
+        for (size_t j = 0; j < 4; j++)
+        {
+            if (pointers[j] != PHY_NULL)
+            {
+                memory_phy_free(pointers[j]);
+            }
+        }
         vga_print_cstr(0, lineCounter++, "Freed all allocations.", 0x17);
     }
 

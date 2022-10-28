@@ -12,20 +12,20 @@ MemoryACPIMapEntry_t memory_MemoryMapACPI[ACPI_MEMORY_MAP_LENGTH];
 MemoryPhyAllocLink_t memory_PhyAllocListRoot;
 
 // This is very inefficient and it frags the memory quite a lot
-uintptr_t memory_phy_allocate(size_t size)
+physical_ptr_t memory_phy_allocate(size_t size)
 {
     // The allocated memory will contain the allocation link too
     size += sizeof(MemoryPhyAllocLink_t);
 
-    uintptr_t firstfit = phy_get_firstfit(size);
-    if (firstfit == 0)
+    physical_ptr_t firstfit = phy_get_firstfit(size);
+    if (firstfit == PHY_NULL)
     {
-        return 0;
+        return PHY_NULL;
     }
 
     // Create the allocation link
     MemoryPhyAllocLink_t *allocLink = (MemoryPhyAllocLink_t *)firstfit;
-    allocLink->BaseAddress = (uintptr_t)allocLink;
+    allocLink->BaseAddress = (physical_ptr_t)allocLink;
     allocLink->Length = size;
     allocLink->Prev = &memory_PhyAllocListRoot;
     allocLink->Next = memory_PhyAllocListRoot.Next;
@@ -41,11 +41,17 @@ uintptr_t memory_phy_allocate(size_t size)
     return firstfit + sizeof(MemoryPhyAllocLink_t);
 }
 
-void memory_phy_free(uintptr_t pointer)
+void memory_phy_free(physical_ptr_t pointer)
 {
+    if (pointer == PHY_NULL)
+    {
+        // Can't free NULL pointer
+        return;
+    }
+
     // We don't have to traverse the linked list, the entry should be right under the pointer
     MemoryPhyAllocLink_t *target = ((MemoryPhyAllocLink_t *)pointer) - 1;
-    uintptr_t actualDataPointer = target->BaseAddress + sizeof(MemoryPhyAllocLink_t);
+    physical_ptr_t actualDataPointer = target->BaseAddress + sizeof(MemoryPhyAllocLink_t);
     if (actualDataPointer != pointer)
     {
         // Trying to free invalid pointer?

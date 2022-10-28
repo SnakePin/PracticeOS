@@ -3,17 +3,19 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void memory_init();
-
-uintptr_t memory_phy_allocate(size_t size);
-void memory_phy_free(uintptr_t pointer);
-
 //int_gate16 exists here. The kernel and it's stack does so too until we improve the loader code.
 #define MEMORY_KERNEL_RESERVED 0x3FFFFF //First 4MiB of the RAM
+#define PHY_NULL 0
 
 //This must be changed if we want to support PAE in 32-bit mode
+typedef uintptr_t physical_ptr_t;
+
+void memory_init();
+physical_ptr_t memory_phy_allocate(size_t size);
+void memory_phy_free(physical_ptr_t pointer);
+
 typedef struct {
-    uintptr_t BaseAddress;
+    physical_ptr_t BaseAddress;
     size_t Length;
     void* Next;
     void* Prev;
