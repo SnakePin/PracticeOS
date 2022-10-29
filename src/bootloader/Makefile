@@ -5,7 +5,7 @@ LD			= ld
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 
-ASM_OBJS    = utils.o mbr_code.o vbr_loader.o vbr_stage2.o vbr_stage2_trampoline.o
+ASM_OBJS    = utils.o mbr_main.o vbr_main.o vbr_trampoline.o
 ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 OBJCOPY_TARGETS = $(addprefix $(OUT)/, vbr.bin mbr.bin)
 
@@ -18,10 +18,10 @@ ensure_path:
 $(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s | ensure_path
 	$(AS) $(ASFLAGS) "$<" -o "$@"
 
-$(OUT)/vbr.elf: $(addprefix $(OUT)/, vbr_loader.o vbr_stage2.o utils.o vbr_stage2_trampoline.o)
+$(OUT)/vbr.elf: $(addprefix $(OUT)/, vbr_main.o vbr_trampoline.o utils.o)
 	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^)
 
-$(OUT)/mbr.elf: $(addprefix $(OUT)/, mbr_code.o utils.o)
+$(OUT)/mbr.elf: $(addprefix $(OUT)/, mbr_main.o utils.o)
 	$(LD) $(LDFLAGS) -T mbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^)
 
 $(OBJCOPY_TARGETS): $(OUT)/%.bin: $(OUT)/%.elf

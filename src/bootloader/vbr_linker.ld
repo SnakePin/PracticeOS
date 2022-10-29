@@ -2,24 +2,13 @@ OUTPUT_FORMAT("elf32-i386")
 OUTPUT_ARCH("i386")
 ENTRY(_entry)
 
-MEMORY
-{
-    SEG1 (rwx) : ORIGIN = 0x7c00, LENGTH = 1M
-}
-
 SECTIONS
 {
-    . = 0x7c00;
+    . = 0x7C00;
     PROVIDE(__executable_start = .);
-    /* Stage 1, must be able to access utils */
     .text ALIGN(1) : { *(.init) *(.text) }
     .data ALIGN(1) : { *(.data) }
-    ASSERT((. - __executable_start) <= 512, "Error: VBR loader is larger than 512 bytes")
-    
-    /* Stage 2 */
-    .text_stage2 ALIGN(1) : { *(.text_stage2) }
-    .data_stage2 ALIGN(1) : { *(.data_stage2) }
-    __vbr_size = . - __executable_start;
+    ASSERT((. - __executable_start) <= 512, "Error: VBR is larger than 512 bytes")
 
     /* DWARF debug sections.
     Symbols in the DWARF debugging sections are relative to the beginning
@@ -61,5 +50,4 @@ SECTIONS
     .gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }
 
     /DISCARD/ : {*(*)}
-    ASSERT(__vbr_size <= 65536, "Error: VBR is larger than 64KiB")
 }

@@ -2,18 +2,13 @@ OUTPUT_FORMAT("elf32-i386")
 OUTPUT_ARCH("i386")
 ENTRY(_entry)
 
-MEMORY
-{
-    SEG1 (rwx) : ORIGIN = 0, LENGTH = 1M
-}
-
 SECTIONS
 {
-    /* Origin at 0, we'll use segment registers instead */
+    . = 0x0000; /* Origin at 0, we'll use segment registers instead */
     PROVIDE(__executable_start = .);
     .text ALIGN(1) : { *(.init) *(.text) }
     .data ALIGN(1) : { *(.data) }
-    __mbr_bootstrap_size = . - __executable_start;
+    ASSERT((. - __executable_start) <= 446, "Error: MBR is larger than 446 bytes")
 
     /* DWARF debug sections.
     Symbols in the DWARF debugging sections are relative to the beginning
@@ -55,5 +50,4 @@ SECTIONS
     .gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }
 
     /DISCARD/ : {*(*)}
-    ASSERT(__mbr_bootstrap_size <= 446, "Error: MBR is larger than 446 bytes")
 }

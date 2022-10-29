@@ -15,9 +15,7 @@ extern enable_all_interrupts
 
 [SECTION .data]
 ; BEGIN VARIABLE DEFINITIONS
-cstring_def BOOTING_VBR_MSG, 'Booting VBR...'
-cstring_def FAIL_NO_LBA_EXTENSION, 'System has no LBA support!'
-cstring_def FAIL_LBA_READ, 'LBA read fail in MBR!'
+cstring_def LBA_FAIL, 'LBA fail in MBR!'
 cstring_def FAIL_NO_BOOTABLE_FOUND, 'No active partition found!'
 BOOT_DISK_ID_VAR db 0x00
 MBR_BOOT_PTE_VAR dw 0x0000
@@ -39,9 +37,9 @@ STACK_SIZE EQU 0x6000      ; 24KiB
 [SECTION .init]
 global _entry:function
 _entry:
-    jmp MBR_ORIG_SEGMENT:first_stage ; fix cs
-first_stage:
-    .initialize_stack:
+    jmp MBR_ORIG_SEGMENT:relocate_mbr ; fix cs
+relocate_mbr:
+    ; Initialize a proper stack
     call disable_all_interrupts
     mov ax, STACK_SEGMENT
     mov ss, ax
@@ -49,7 +47,7 @@ first_stage:
     mov sp, ax
     mov bp, sp
     call enable_all_interrupts
-    .copy_mbr:
+    ; Copy the MBR to the target address
     xor si, si
     xor di, di
     mov ax, MBR_ORIG_SEGMENT
@@ -58,24 +56,24 @@ first_stage:
     mov es, ax
     mov cx, (MBR_SIZE / 2)
     rep movsw ; DS:SI to ES:DI, cx times, 2 steps at once
-    jmp MBR_COPY_SEGMENT:second_stage
+    jmp MBR_COPY_SEGMENT:load_vbr
 
-second_stage:
+load_vbr:
     mov ax, MBR_COPY_SEGMENT
     mov ds, ax ; Both the VGA and the LBA functions read from DS:SI
     mov byte [BOOT_DISK_ID_VAR], dl
-    .lba_check:
+    ; Check the existence of LBA extensions
     call lba_extension_check
     test al, al
-    mov si, FAIL_NO_LBA_EXTENSION
-    jz .error
-    .lba_check_success:
+    mov si, LBA_FAIL
+    jz mbr_error
+    ; LBA Check is successfull
     call mbr_get_vbr_lba
     mov word [MBR_BOOT_PTE_VAR], bx
     test al, al
     mov si, FAIL_NO_BOOTABLE_FOUND
-    jz .error
-    .bootable_found:
+    jz mbr_error
+    ; Bootable partition is found, load the VBR
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_l], cx
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], dx
     mov word [lba_xfer_pkt + ltp_num_sector], 1
@@ -85,21 +83,9 @@ second_stage:
     mov al, byte [BOOT_DISK_ID_VAR] ; (0x80|DiskID)
     call lba_send_transfer_packet
     test al, al
-    mov si, FAIL_LBA_READ
-    jz .error
-    .lba_read_success:
-    mov si, BOOTING_VBR_MSG
-    call vga_print_cstr
-    jmp third_stage ; noreturn
-    .error:
-    call vga_clear_scr
-    call vga_print_cstr
-    .halt: ; Maybe shutdown here instead?
-    cli
-    hlt
-    jmp .halt
-
-third_stage:
+    mov si, LBA_FAIL
+    jz mbr_error
+    ; VBR successfully loaded, jump to it
     ; OS/2 VBR Interface
     mov dl, byte [BOOT_DISK_ID_VAR]
     mov si, word [MBR_BOOT_PTE_VAR]
@@ -107,6 +93,14 @@ third_stage:
     mov ds, ax
     mov si, bx ; bx is the offset of the bootable PTE, set on the last mbr_get_vbr_lba call
     jmp 0x0000:VBR_ADDRESS
+
+mbr_error:
+    call vga_clear_scr
+    call vga_print_cstr
+    .halt: ; Maybe shutdown here instead?
+    cli
+    hlt
+    jmp .halt
 
 ; BX=Offset of the bootable PTE in MBR, CX=Lower 16 Bits, DX=Higher 16 bits, AL=0 indicates failure
 mbr_get_vbr_lba:

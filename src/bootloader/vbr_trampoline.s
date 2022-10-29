@@ -6,7 +6,7 @@
 extern disable_all_interrupts
 ; END EXTERN DECLARATIONS
 
-[SECTION .data_stage2]
+[SECTION .data]
 gdt_descriptor:
     gdt_size dw GDT_SIZE-1
     gdt_offset_l dw global_descriptor_table
@@ -30,18 +30,18 @@ global_descriptor_table:
     iend
 GDT_SIZE EQU ($ - global_descriptor_table)
 
-[SECTION .text_stage2]
-global vbr_stage2_trampoline:function
-vbr_stage2_trampoline:
+[SECTION .text]
+global vbr_trampoline16:function
+vbr_trampoline16:
     call disable_all_interrupts
     lgdt [gdt_descriptor]
     mov eax, cr0
     or eax, 1
     mov cr0, eax
-    jmp 0x08:vbr_stage2_trampoline32
+    jmp 0x08:vbr_trampoline32
 
 [BITS 32]
-vbr_stage2_trampoline32:
+vbr_trampoline32:
     ; We're in 32bit protected mode here
     mov eax, 0x10
     mov ds, eax

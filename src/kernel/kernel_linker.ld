@@ -2,15 +2,9 @@ OUTPUT_FORMAT("elf32-i386")
 OUTPUT_ARCH("i386")
 ENTRY(_entry)
 
-MEMORY
-{
-    /* Our assembly files are not PIC, therefore our executable is not PIE */
-    RAM (rwx) : ORIGIN = 0x17BF0, LENGTH = 4096M
-}
-
 SECTIONS
 {
-    . = 0x17BF0;
+    . = 0x17BF0; /* Should be 0xC0000000 when paging support is added */
     /* Code */
     .text ALIGN(1) :
     {
