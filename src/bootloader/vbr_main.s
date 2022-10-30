@@ -39,6 +39,8 @@ DISK_TEMP_BUFFER EQU 0x6500 ; Right after stack
 global _entry:function
 _entry:
     jmp 0x0000:vbr_main ; fix cs
+
+[SECTION .text]
 ; DS:SI = PTE in the MBR, DL = Boot Disk ID
 vbr_main:
     ; Initialize a proper stack

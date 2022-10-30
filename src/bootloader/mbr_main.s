@@ -38,6 +38,8 @@ STACK_SIZE EQU 0x6000      ; 24KiB
 global _entry:function
 _entry:
     jmp MBR_ORIG_SEGMENT:relocate_mbr ; fix cs
+
+[SECTION .text]
 relocate_mbr:
     ; Initialize a proper stack
     call disable_all_interrupts
