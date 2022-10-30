@@ -9,8 +9,7 @@ global _entry:function
 
 [SECTION .init]
 _entry:
-    ; The bootloader won't set the stack up for us
-    mov esp, 0x400000 ; Fourth MiB, should be conventionally free, can we move this to the memory manager?
+    mov esp, 0x200000 ; Second MiB, temporary stack, allocate a real stack ASAP
     call load_kernel_gdt
     call load_kernel_idt
     call kmain
