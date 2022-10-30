@@ -32,7 +32,7 @@ lba_xfer_pkt:
 ; BEGIN CONSTANT DEFINITIONS
 STACK_SEGMENT EQU 0x70     ; Stack ends right after the MBR copy
 STACK_SIZE EQU 0x6000      ; 24KiB
-DISK_TEMP_BUFFER EQU 0x6500 ; Right after stack
+DISK_TEMP_BUFFER EQU 0x6700 ; Right after stack
 ; END CONSTANT DEFINITIONS
 
 [SECTION .init]
