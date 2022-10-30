@@ -4,6 +4,9 @@
 
 ; BEGIN EXTERN DECLARATIONS
 extern disable_all_interrupts
+extern BOOT_DISK_ID_VAR     ; byte
+extern BOOT_PAR_LBA_L_VAR   ; word
+extern BOOT_PAR_LBA_H_VAR   ; word
 ; END EXTERN DECLARATIONS
 
 [SECTION .data]
@@ -49,4 +52,10 @@ vbr_trampoline32:
     mov fs, eax
     mov gs, eax
     mov ss, eax
+    ; A custom interface, BOOT_PAR_LBA @ eax, BOOT_DISK_ID @ ebx
+    xor ebx, ebx
+    mov bl, byte [BOOT_DISK_ID_VAR]
+    mov ax, word [BOOT_PAR_LBA_H_VAR]
+    shl eax, 16
+    mov ax, word [BOOT_PAR_LBA_L_VAR]
     jmp KERNEL_LOAD_FLAT_ADDR

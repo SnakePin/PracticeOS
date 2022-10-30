@@ -4,21 +4,24 @@
 %include "defs.s"
 %use ifunc ; only used for ilog2e
 
-; BEGIN EXTERN DECLARATIONS
+; BEGIN EXTERN/GLOBAL DECLARATIONS
 extern vga_clear_scr
 extern vga_print_cstr
 extern lba_send_transfer_packet
 extern vbr_trampoline16
 extern disable_all_interrupts
 extern enable_all_interrupts
-; END EXTERN DECLARATIONS
+global BOOT_DISK_ID_VAR
+global BOOT_PAR_LBA_L_VAR
+global BOOT_PAR_LBA_H_VAR
+; END EXTERN/GLOBAL DECLARATIONS
 
 [SECTION .data]
 ; BEGIN VARIABLE DEFINITIONS
 cstring_def UNSPECIFIED_FAIL, 'VBR failed!'
 BOOT_DISK_ID_VAR db 0x00
-VBR_LBA_ADDRESS_L_VAR dw 0x0000 ; Our LBA address
-VBR_LBA_ADDRESS_H_VAR dw 0x0000
+BOOT_PAR_LBA_L_VAR dw 0x0000 ; Our LBA address
+BOOT_PAR_LBA_H_VAR dw 0x0000
 align 4 ; LBA Transfer Packet must be aligned to 4 bytes
 lba_xfer_pkt:
     istruc lba_transfer_packet_t 
@@ -27,7 +30,7 @@ lba_xfer_pkt:
     iend
 
 ; BEGIN CONSTANT DEFINITIONS
-STACK_SEGMENT EQU 0x50     ; First free memory
+STACK_SEGMENT EQU 0x70     ; Stack ends right after the MBR copy
 STACK_SIZE EQU 0x6000      ; 24KiB
 DISK_TEMP_BUFFER EQU 0x6500 ; Right after stack
 ; END CONSTANT DEFINITIONS
@@ -51,8 +54,8 @@ vbr_main:
     mov cx, word [ds:si + mp_lba_first_h]
     xor ax, ax
     mov ds, ax ; fix DS
-    mov word [VBR_LBA_ADDRESS_L_VAR], bx
-    mov word [VBR_LBA_ADDRESS_H_VAR], cx
+    mov word [BOOT_PAR_LBA_L_VAR], bx
+    mov word [BOOT_PAR_LBA_H_VAR], cx
     mov byte [BOOT_DISK_ID_VAR], dl
     ; Enable A20 line, TODO: Write proper code to do this
     mov ax, 0x2401
@@ -84,9 +87,9 @@ vbr_read_from_boot_par:
     jz vbr_error
     mov word [lba_xfer_pkt + ltp_num_sector], ax
     mov al, byte [BOOT_DISK_ID_VAR]
-    add bx, word [VBR_LBA_ADDRESS_L_VAR]
+    add bx, word [BOOT_PAR_LBA_L_VAR]
     adc cx, 0
-    add cx, word [VBR_LBA_ADDRESS_H_VAR]
+    add cx, word [BOOT_PAR_LBA_H_VAR]
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_l], bx
     mov word [lba_xfer_pkt + ltp_lba_addr_lower32_h], cx
     mov si, lba_xfer_pkt
