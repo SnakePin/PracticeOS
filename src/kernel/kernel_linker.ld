@@ -33,8 +33,9 @@ SECTIONS
     /* Uninitialized data */
     .bss ALIGN(1) :
     {
-        *(.bss*)
-        *(.sbss*)
+        *(.dynbss)
+        *(.bss .bss.* .gnu.linkonce.b.*)
+        *(COMMON)
     }
 
     /* DWARF debug sections.

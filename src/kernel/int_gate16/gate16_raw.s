@@ -86,6 +86,7 @@ trampoline_to_kernel:
     mov ds, bx
     mov ss, bx
     ; Far jump to trampoline_to_kernel_32
+    mov ax, word [INT_GATE16_PARAM_ADDR + g16p_pm_ds] ; 32bit trampoline code will use this
     push word [INT_GATE16_PARAM_ADDR + g16p_pm_cs]
     push strict word trampoline_to_kernel_32
     retf
@@ -93,7 +94,6 @@ trampoline_to_kernel:
 [BITS 32]
 trampoline_to_kernel_32:
     ; We're in 32bit protected mode here
-    mov ax, word [INT_GATE16_PARAM_ADDR + g16p_pm_ds]
     mov ds, ax
     mov es, ax
     mov fs, ax
