@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 //int_gate16 exists here. The kernel and it's stack does so too until we improve the loader code.
-#define MEMORY_KERNEL_RESERVED 0x3FFFFF //First 4MiB of the RAM
+#define MEMORY_KERNEL_RESERVED 0xFFFFFF //First 16MiB
 #define PHY_NULL 0
 
 //This must be changed if we want to support PAE in 32-bit mode

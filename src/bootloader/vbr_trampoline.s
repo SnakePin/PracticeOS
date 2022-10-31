@@ -58,4 +58,4 @@ vbr_trampoline32:
     mov ax, word [BOOT_PAR_LBA_H_VAR]
     shl eax, 16
     mov ax, word [BOOT_PAR_LBA_L_VAR]
-    jmp KERNEL_LOAD_FLAT_ADDR
+    jmp KERNEL_LDR_LOAD_FLAT_ADDR

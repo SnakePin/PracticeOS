@@ -4,7 +4,7 @@ ENTRY(_entry)
 
 SECTIONS
 {
-    . = 0xC0000000;
+    . = 0x1000; /* Having the loader in the first 64KiB allows for a much simpler int_gate16 */
     /* Code */
     .text ALIGN(1) :
     {
@@ -37,6 +37,8 @@ SECTIONS
         *(.bss .bss.* .gnu.linkonce.b.*)
         *(COMMON)
     }
+    ASSERT(. <= 65536, "Error: Kernel loader can't fit in the first 64KiB")
+    /* The loader must exist in the first 64KiB of the RAM because that makes the int_gate16 much simpler */
 
     /* DWARF debug sections.
     Symbols in the DWARF debugging sections are relative to the beginning

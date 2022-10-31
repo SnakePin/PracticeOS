@@ -7,7 +7,8 @@ enum MBRPartitionTypes : byte
 {
     Free = 0x00,
     FAT32wCHS = 0x0B,
-    FAT32wLBA = 0x0C
+    FAT32wLBA = 0x0C,
+    LinuxNativeFS = 0x83
 };
 
 [StructLayout(LayoutKind.Sequential)]
@@ -53,20 +54,16 @@ static byte[] GetBytesFromStruct<T>(T str) where T : struct
     return arr;
 }
 
-static byte[] UInt16ToLEBytes(UInt16 value) {
-    byte[] bytes = BitConverter.GetBytes(value);
-    if (!BitConverter.IsLittleEndian) {
-        Array.Reverse(bytes);
-    }
-    return bytes;
+static byte[] MakeCHS(int cylinder, int head, int sector) {
+    byte cylinderHighBits = (byte)((cylinder&0x0300)>>8);
+    return new byte[3] { (byte)head, (byte)((sector&0x3F)|cylinderHighBits), (byte)cylinder };
 }
 
 static void WriteMBRPTE(Stream strm, bool active, MBRPartitionTypes type, uint lbaStart, uint sectorCount)
 {
     var pte = new MBRPTEStruct();
-    //I really do hate CHS
-    pte.CHSFirst = new byte[3] { 0, 0, 0 };
-    pte.CHSLast = new byte[3] { 0, 0, 0 };
+    pte.CHSFirst = MakeCHS(1023, 254, 63); //Invalid CHS value
+    pte.CHSLast = MakeCHS(1023, 254, 63); //Invalid CHS value
     pte.LBAFirst = lbaStart;
     pte.SectorCount = sectorCount;
     pte.Status = (byte)(active ? 0x80 : 0x00);
@@ -77,9 +74,10 @@ static void WriteMBRPTE(Stream strm, bool active, MBRPartitionTypes type, uint l
 const string diskOutFile = "out/disk.img";
 const string mbrBootstrapPath = "out/bootloader/mbr.bin";
 const string vbrFilePath = "out/bootloader/vbr.bin";
-const string kernelFilePath = "out/kernel/kernel.bin";
+const string kernelLdrFilePath = "out/kernel_loader/kernel_loader.bin";
+const string kernelFilePath = "out/kernel/kernel_min.elf";
 const int MBRBootstrapEnd = 446;
-const int VBRMax = 522495; //522495 is the length of continuous memory right after the the MBR in RAM
+const int VBRMax = 512;
 
 //Main code starts here
 var mbrBootstrapBytes = File.ReadAllBytes(mbrBootstrapPath);
@@ -94,6 +92,7 @@ if (vbrBytes.Length > VBRMax)
     Console.WriteLine($"VBR code must be less than {VBRMax} bytes.");
     return 1;
 }
+var kernelLdrBytes = File.ReadAllBytes(kernelLdrFilePath);
 var kernelBytes = File.ReadAllBytes(kernelFilePath);
 
 Console.WriteLine("Writing disk image...");
@@ -106,7 +105,7 @@ using (FileStream fs = File.Open(diskOutFile, FileMode.Create, FileAccess.Write,
     fs.Write(mbrBootstrapBytes);
     fs.Seek(MBRBootstrapEnd, SeekOrigin.Begin);
     //Active, starts at LBA 64, 16MiB
-    WriteMBRPTE(fs, true, MBRPartitionTypes.FAT32wLBA, partitionBaseLBA, (uint)partitionSize/LBASectorSize);
+    WriteMBRPTE(fs, true, MBRPartitionTypes.LinuxNativeFS, partitionBaseLBA, (uint)partitionSize/LBASectorSize);
     WriteMBRPTE(fs, false, MBRPartitionTypes.Free, 0, 0);
     WriteMBRPTE(fs, false, MBRPartitionTypes.Free, 0, 0);
     WriteMBRPTE(fs, false, MBRPartitionTypes.Free, 0, 0);
@@ -116,12 +115,15 @@ using (FileStream fs = File.Open(diskOutFile, FileMode.Create, FileAccess.Write,
     fs.Seek(partitionBase, SeekOrigin.Begin);
     fs.Write(vbrBytes);
 
+    //Kernel loader, TODO: Make this a file instead
+    fs.Seek(partitionBase+(0x10000-2), SeekOrigin.Begin);
+    fs.Write(BitConverter.GetBytes((UInt16)Math.Ceiling((double)kernelLdrBytes.Length / LBASectorSize)));
+    fs.Write(kernelLdrBytes); //0x10000
+
     //Kernel, TODO: Make this a file instead
-    fs.Seek(partitionBase+0xFFFE, SeekOrigin.Begin);
-    //This calculation is only valid if the kernel is aligned to LBASectorSize boundary
-    UInt16 kernelSectorSpan = (ushort)Math.Ceiling((double)kernelBytes.Length / LBASectorSize);
-    fs.Write(UInt16ToLEBytes(kernelSectorSpan));
-    fs.Write(kernelBytes); //0x10000
+    fs.Seek(partitionBase+(0x20000-4), SeekOrigin.Begin);
+    fs.Write(BitConverter.GetBytes((UInt32)kernelBytes.Length)); //Length is in bytes for the kernel image only
+    fs.Write(kernelBytes); //0x20000
 
     //Partition 1's last byte
     fs.Seek(partitionBase+partitionSize-1, SeekOrigin.Begin);

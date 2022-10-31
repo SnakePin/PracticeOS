@@ -62,21 +62,21 @@ vbr_main:
     ; Enable A20 line, TODO: Write proper code to do this
     mov ax, 0x2401
     int 0x15
-    ; Read kernel length word from disk
+    ; Read length word from disk
     mov word [lba_xfer_pkt + ltp_mem_offset], DISK_TEMP_BUFFER
     mov word [lba_xfer_pkt + ltp_mem_segment], 0
-    mov bx, ADDR_TO_LBA_SECTOR(KERNEL_IMAGE_LEN_OFFSET)
+    mov bx, ADDR_TO_LBA_SECTOR(KERNEL_LDR_IMG_LEN_OFF)
     xor cx, cx
     mov ax, 1 ; num_sector
     call vbr_read_from_boot_par
     test al, al
     jz vbr_error
     ; Read kernel from disk
-    mov word [lba_xfer_pkt + ltp_mem_offset], KERNEL_LOAD_OFF
-    mov word [lba_xfer_pkt + ltp_mem_segment], KERNEL_LOAD_SEG
-    mov bx, ADDR_TO_LBA_SECTOR(KERNEL_IMAGE_OFFSET)
+    mov word [lba_xfer_pkt + ltp_mem_offset], KERNEL_LDR_LOAD_OFF
+    mov word [lba_xfer_pkt + ltp_mem_segment], KERNEL_LDR_LOAD_SEG
+    mov bx, ADDR_TO_LBA_SECTOR(KERNEL_LDR_IMG_OFFSET)
     xor cx, cx
-    mov ax, word [DISK_TEMP_BUFFER + ADDR_TO_LBA_SECTOR_OFFSET(KERNEL_IMAGE_LEN_OFFSET)] ; num_sector
+    mov ax, word [DISK_TEMP_BUFFER + ADDR_TO_LBA_SECTOR_OFFSET(KERNEL_LDR_IMG_LEN_OFF)] ; num_sector
     call vbr_read_from_boot_par
     test al, al
     jz vbr_error

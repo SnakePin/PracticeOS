@@ -1,11 +1,14 @@
 .PHONY: all clean kernel bootloader diskimg
 all: kernel bootloader diskimg
 
-diskimg: kernel bootloader
+diskimg: kernel kernel_loader bootloader
 	dotnet-script mkdisk.csx
 
 bootloader:
 	@$(MAKE) -j$(shell nproc) -C src/bootloader
+
+kernel_loader:
+	@$(MAKE) -j$(shell nproc) -C src/kernel_loader
 
 kernel:
 	@$(MAKE) -j$(shell nproc) -C src/kernel

@@ -15,20 +15,20 @@ int memcmp(const void *s1, const void *s2, size_t n)
     return 0;
 }
 
-void* memcpy(void* dst, const void* src, size_t num)
+void *memcpy(void *dst, const void *src, size_t num)
 {
-    for (;num != 0; num--)
+    for (; num != 0; num--)
     {
-        ((uint8_t*)dst)[num-1] = ((uint8_t*)src)[num-1];
+        ((uint8_t *)dst)[num - 1] = ((uint8_t *)src)[num - 1];
     }
     return dst;
 }
 
-void* memset(void* ptr, int val, size_t num)
+void *memset(void *ptr, int val, size_t num)
 {
-    for (;num != 0; num--)
+    for (; num != 0; num--)
     {
-        ((uint8_t*)ptr)[num-1] = (uint8_t)val;
+        ((uint8_t *)ptr)[num - 1] = (uint8_t)val;
     }
     return ptr;
 }
@@ -36,6 +36,7 @@ void* memset(void* ptr, int val, size_t num)
 size_t strlen(const char *str)
 {
     size_t i = 0;
-    while(str[i++] != '\x00');
-    return --i; //Don't count the null terminator
+    while (str[i++] != '\x00')
+        ;
+    return --i; // Don't count the null terminator
 }

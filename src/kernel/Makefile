@@ -14,7 +14,7 @@ ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
 
 .PHONY: all clean ensure_path
-all: $(OUT)/kernel.bin
+all: $(OUT)/kernel_min.elf $(OUT)/kernel.elf
 
 ensure_path:
 	@mkdir -p $(OUT)
@@ -37,9 +37,8 @@ $(OUT)/int_gate16/gate16_raw.bin: $(SRC)/int_gate16/gate16_raw.s | ensure_path
 $(OUT)/int_gate16/gate16_embed.o: $(SRC)/int_gate16/gate16_embed.s $(OUT)/int_gate16/gate16_raw.bin | ensure_path
 	$(AS) $(ASFLAGS) "$<" -o "$@"
 
-# This doesn't put the .bss in the output file, we should write an elf loader in the BL instead.
-$(OUT)/kernel.bin: $(OUT)/kernel.elf | ensure_path
-	objcopy -S -O binary "$<" "$@"
+$(OUT)/kernel_min.elf: $(OUT)/kernel.elf | ensure_path
+	strip -s "$<" -o "$@"
 
 clean:
 	@rm -rf $(OUT)/* || true
