@@ -5,9 +5,10 @@ ENTRY(_entry)
 SECTIONS
 {
     . = 0x7C00;
-    PROVIDE(__executable_start = .);
+    __executable_start = .;
     .text ALIGN(1) : { *(.init) *(.text) }
     .data ALIGN(1) : { *(.data) }
+    __executable_end = .;
     ASSERT((. - __executable_start) <= 512, "Error: VBR is larger than 512 bytes")
 
     /* DWARF debug sections.

@@ -5,9 +5,10 @@ ENTRY(_entry)
 SECTIONS
 {
     . = 0x0000; /* Origin at 0, we'll use segment registers instead */
-    PROVIDE(__executable_start = .);
+    __executable_start = .;
     .text ALIGN(1) : { *(.init) *(.text) }
     .data ALIGN(1) : { *(.data) }
+    __executable_end = .;
     ASSERT((. - __executable_start) <= 446, "Error: MBR is larger than 446 bytes")
 
     /* DWARF debug sections.

@@ -5,6 +5,8 @@ ENTRY(_entry)
 SECTIONS
 {
     . = 0xC0000000;
+    __executable_start = .;
+
     /* Code */
     .text ALIGN(1) :
     {
@@ -37,6 +39,8 @@ SECTIONS
         *(.bss .bss.* .gnu.linkonce.b.*)
         *(COMMON)
     }
+
+    __executable_end = .;
 
     /* DWARF debug sections.
     Symbols in the DWARF debugging sections are relative to the beginning
