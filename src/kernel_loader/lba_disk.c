@@ -37,7 +37,7 @@ uint8_t lba_read_from_disk(uint8_t diskID, uint32_t lbaOffset, uint64_t byteOffs
     uintptr_t loadAddr = INT_GATE16_LBA_BUFFER;
     uint64_t firstLBAToRead = lbaOffset + (byteOffset / LBA_SECTOR_SIZE);
     size_t offsetInSector = byteOffset % LBA_SECTOR_SIZE;
-    size_t sectorsToRead = INT_DIV_CEIL(offsetInSector + length, LBA_SECTOR_SIZE);
+    size_t sectorsToRead = ALIGN_ADDRESS_CEIL(offsetInSector + length, LBA_SECTOR_SIZE) / LBA_SECTOR_SIZE;
 
     LBATransferPacket_t packet = {.sizeOfPacket = sizeof(LBATransferPacket_t),
                                   .unused = 0,

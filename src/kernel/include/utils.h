@@ -1,5 +1,10 @@
 #pragma once
 #include <stddef.h>
+#include <stdint.h>
+
+typedef uint8_t bool_t;
+#define TRUE 1
+#define FALSE 0
 
 int memcmp(const void *s1, const void *s2, size_t n);
 void* memcpy(void* dst, const void* src, size_t num);

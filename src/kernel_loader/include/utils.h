@@ -8,6 +8,5 @@ void *memset(void *ptr, int val, size_t num);
 #define NORETURN_ATTR __attribute__((noreturn))
 #define CDECL_ATTR __attribute__((cdecl))
 #define PACKED_ATTR __attribute__((packed))
-#define INT_DIV_CEIL(x, y) ((x) / (y) + !!((x) % (y)))
 #define ALIGN_ADDRESS_CEIL(x, align) ((uintptr_t)(x) + ((align) - (uintptr_t)(x) % (align)))
 #define ALIGN_ADDRESS_FLOOR(x, align) ((uintptr_t)(x) - ((uintptr_t)(x) % (align)))

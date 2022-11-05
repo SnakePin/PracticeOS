@@ -5,8 +5,8 @@
 void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset);
 uint16_t pic8259_get_disabled_irq_mask();
 void pic8259_set_disabled_irq_mask(uint16_t combinedIRQMask);
-void pic8259_send_eoi(uint8_t picIrqNum, uint8_t isSpurious);
-uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum);
+void pic8259_send_eoi(uint8_t picIrqNum, bool_t isSpurious);
+bool_t pic8259_is_irq_spurious(uint8_t picIrqNum);
 
 /*
  * A0 in the datasheet refers to the last bit of the port address.

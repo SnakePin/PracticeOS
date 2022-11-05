@@ -23,7 +23,7 @@ CDECL_ATTR void generic_c_isr(IRQVectorNum_t vectorNumber, uint32_t errorCode)
     if (IS_VEC_PIC_INTERRUPT(vectorNumber))
     {
         uint8_t picIrqNum = vectorNumber - PIC8259_CUSTOM_IRQ_OFFSET;
-        uint8_t isSpurious = pic8259_is_irq_spurious(picIrqNum);
+        bool_t isSpurious = pic8259_is_irq_spurious(picIrqNum);
 
         // TODO: do something here
 

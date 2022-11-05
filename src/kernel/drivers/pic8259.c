@@ -54,7 +54,7 @@ uint16_t pic8259_get_disabled_irq_mask()
     return masterMask | (slaveMask << 8);
 }
 
-void pic8259_send_eoi(uint8_t picIrqNum, uint8_t isSpurious)
+void pic8259_send_eoi(uint8_t picIrqNum, bool_t isSpurious)
 {
     OCW2Union_t ocw2 = {.raw = 0};
     ocw2.EOI = 1;
@@ -73,7 +73,7 @@ void pic8259_send_eoi(uint8_t picIrqNum, uint8_t isSpurious)
     }
 }
 
-uint8_t pic8259_is_irq_spurious(uint8_t picIrqNum)
+bool_t pic8259_is_irq_spurious(uint8_t picIrqNum)
 {
     uint8_t picNum = 1;
     if (picIrqNum >= 8)
