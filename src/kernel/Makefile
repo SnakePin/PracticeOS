@@ -3,7 +3,7 @@ SRC			= .
 AS			= nasm
 LD			= ld
 CC			= gcc
-CFLAGS		= -m32 -ffreestanding -nostdlib -c -std=c11 -pedantic -o3 -Wall -gdwarf-2
+CFLAGS		= -m32 -ffreestanding -nostdlib -c -std=c11 -pedantic -Wall -gdwarf-2
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 INCLUDE		= $(SRC)/include
