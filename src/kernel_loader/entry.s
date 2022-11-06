@@ -15,7 +15,7 @@ _entry:
     ; A custom interface with the VBR, BOOT_PAR_LBA @ eax, BOOT_DISK_ID_VAR @ ebx
     mov dword [BOOT_PAR_LBA_VAR], eax
     mov dword [BOOT_DISK_ID_VAR], ebx
-    mov esp, 0x200000 ; Second MiB, temporary stack, allocate a real stack ASAP
+    mov esp, 0x80000 ; Just below EBDA
     call load_default_gdt
     push dword [BOOT_PAR_LBA_VAR]
     push dword [BOOT_DISK_ID_VAR]

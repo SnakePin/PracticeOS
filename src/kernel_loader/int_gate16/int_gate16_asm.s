@@ -49,7 +49,7 @@ int_gate16_jump_to_gate:
     ret
 
 [SECTION .data]
-SAVED_GDT_VAR resb 6
+SAVED_GDT_VAR db 0,0,0,0,0,0
 SAVED_ESP_VAR dd 0
 SAVED_EIP_VAR dd 0
 SAVED_CR0_VAR dd 0
