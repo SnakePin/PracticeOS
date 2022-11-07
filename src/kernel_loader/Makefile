@@ -9,7 +9,7 @@ LDFLAGS		= --warn-section-align
 INCLUDE		= $(SRC)/include
 
 ASM_OBJS	= entry.o gdt.o int_gate16/int_gate16_asm.o paging_asm.o jump_to_code.o
-C_OBJS		= main.o utils.o int_gate16/int_gate16_c.o lba_disk.o paging_c.o
+C_OBJS		= main.o utils.o int_gate16/int_gate16_c.o lba_disk.o paging_c.o memory.o
 ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
 
