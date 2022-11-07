@@ -8,8 +8,8 @@ ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 INCLUDE		= $(SRC)/include
 
-ASM_OBJS	= entry.o gdt_asm.o interrupt_asm.o ioport.o int_gate16/gate_kernel_code_asm.o
-C_OBJS		= main.o gdt_c.o interrupt_c.o utils.o drivers/vga.o drivers/pic8259.o int_gate16/gate_kernel_code_c.o memory/memory.o memory/firstfit.o
+ASM_OBJS	= entry.o gdt_asm.o interrupt_asm.o ioport.o int_gate16/gate_kernel_code_asm.o memory/paging_asm.o
+C_OBJS		= main.o gdt_c.o interrupt_c.o utils.o drivers/vga.o drivers/pic8259.o int_gate16/gate_kernel_code_c.o memory/memory_virt.o memory/paging_c.o memory/memory_phy.o
 ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
 C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
 

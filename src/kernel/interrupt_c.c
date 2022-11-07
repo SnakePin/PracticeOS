@@ -14,7 +14,7 @@ const uint8_t isrTemplate[] = {0x68, 0xCC, 0xCC, 0xCC, 0xCC, 0x68, 0xCC, 0xCC, 0
 #define ISR_COUNT (256)
 #define IDT_ARRAY_SIZE (sizeof(IDTEntry32_t)*ISR_COUNT)
 
-uint8_t SECTION_ATTR(.text.dynamic_isr #) isrArray[ISR_COUNT * ISR_TEMPLATE_LEN];
+uint8_t SECTION_ATTR(.text.dynamic_isr#) isrArray[ISR_COUNT * ISR_TEMPLATE_LEN];
 IDTDescriptor32_t idtDescriptor;
 IDTEntry32_t idtArray[ISR_COUNT];
 

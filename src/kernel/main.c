@@ -5,7 +5,10 @@
 #include "int_gate16/gate.h"
 #include "interrupt.h"
 #include "memory/memory.h"
+#include "memory/paging.h"
 #include "utils.h"
+
+#define REAL_MODE_RESERVED_MEM 0x100000
 
 static char buf[32];
 static char *itoa_custom(int num, int radix)
@@ -50,7 +53,9 @@ void kmain()
     pic8259_set_disabled_irq_mask(0x0000); // Enable all IRs
     enable_all_interrupts();
     int_gate16_init(); // Gate for using real mode BIOS interrupts
-    memory_init();     // Memory functions require int_gate16
+    memory_phy_init(); // Requires int_gate16
+    memory_phy_reserve(0, REAL_MODE_RESERVED_MEM); // reserved by int_gate16
+    memory_virt_init();
 
     uint32_t lineCounter = 0;
     vga_clear_scr(0x17);
@@ -58,12 +63,12 @@ void kmain()
 
     for (size_t currentMib = 16; currentMib <= 64; currentMib += 16)
     {
-        uintptr_t pointers[4];
+        size_t allocSize = 1024 * 1024 * currentMib;
+        void *pointers[4];
         for (size_t j = 0; j < 4; j++)
         {
-            size_t allocSize = 1024 * 1024 * currentMib;
-            pointers[j] = memory_phy_allocate(allocSize);
-            if (pointers[j] == PHY_NULL)
+            pointers[j] = memory_virt_allocate(allocSize);
+            if (pointers[j] == NULL)
             {
                 vga_print_cstr(0, lineCounter++, "Allocation failed!", 0x17);
                 continue;
@@ -71,21 +76,21 @@ void kmain()
             memset((void *)pointers[j], 0xDA, allocSize);
 
             uint32_t columnCounter = 0;
-            char *mib = itoa_custom(currentMib, 10);
+            char *mib = itoa_custom((int)currentMib, 10);
             vga_print_cstr(columnCounter, lineCounter, mib, 0x17);
             columnCounter += strlen(mib);
 
             vga_print_cstr(columnCounter, lineCounter, "MiB @ 0x", 0x17);
             columnCounter += 8;
 
-            char *hex = itoa_custom(pointers[j], 16);
+            char *hex = itoa_custom((int)pointers[j], 16);
             vga_print_cstr(columnCounter, lineCounter++, hex, 0x17);
         }
         for (size_t j = 0; j < 4; j++)
         {
-            if (pointers[j] != PHY_NULL)
+            if (pointers[j] != NULL)
             {
-                memory_phy_free(pointers[j]);
+                memory_virt_free(pointers[j], allocSize);
             }
         }
         vga_print_cstr(0, lineCounter++, "Freed all allocations.", 0x17);
