@@ -18,7 +18,7 @@ typedef struct {
     uint32_t Type;
 } PACKED_ATTR MemoryACPIMapEntry_t;
 
-enum MemoryACPIMapEntryType_t {
+enum MemoryACPIMapEntryType {
     Usable = 1,
     Reserved = 2,
     /*

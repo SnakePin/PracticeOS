@@ -17,7 +17,7 @@ typedef struct
     uint64_t lbaAddress;
 } PACKED_ATTR LBATransferPacket_t;
 
-enum LBARequestType_t
+enum LBARequestType
 {
     LBARead = 0x42,
     LBAWrite = 0x43,

@@ -72,6 +72,6 @@ generic_asm_isr:
     add esp, 8
     iret
 
-[SECTION .data]
+[SECTION .rodata]
 INTERRUPTS_WITH_ERRCODE db 0x08, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x11, 0x15, 0x1D, 0x1E
 INTERRUPTS_WITH_ERRCODE_LEN EQU $-INTERRUPTS_WITH_ERRCODE

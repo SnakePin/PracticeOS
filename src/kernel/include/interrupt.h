@@ -37,6 +37,22 @@ enum IDTGateTypes {
     Trap32Bit = 0x0F
 };
 
+typedef struct
+{
+    uint32_t eax;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t ebx;
+    uint32_t ebp;
+    uint32_t esi;
+    uint32_t edi;
+    uint32_t eip;
+    uint32_t esp;
+    uint16_t ss;
+    uint16_t cs;
+    uint32_t eflags;
+} PACKED_ATTR InterruptSavedRegisters_t;
+
 typedef struct {
     uint16_t offset_l;
     uint16_t segment;
@@ -61,8 +77,6 @@ typedef struct {
 } PACKED_ATTR IDTDescriptor32_t;
 
 typedef uint8_t IRQVectorNum_t;
-
-#define SYSCALL_INTERRUPT (0x80)
 
 CDECL_ATTR void load_idt(void* idt);
 CDECL_ATTR void load_kernel_idt();

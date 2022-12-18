@@ -5,33 +5,43 @@
 #include "drivers/pic8259.h"
 
 CDECL_ATTR void generic_c_isr(IRQVectorNum_t, uint32_t);
-static void *generate_isr_stub(IRQVectorNum_t, void const *);
+static void *set_isr_handler(IRQVectorNum_t, void const *);
 extern const void *const generic_asm_isr; // Linker variable, don't modify or dereference it!
 
-/* push 0xCCCCCCCC; push 0xCCCCCCCC; ret */
-const uint8_t isrTemplate[] = {0x68, 0xCC, 0xCC, 0xCC, 0xCC, 0x68, 0xCC, 0xCC, 0xCC, 0xCC, 0xC3};
-#define ISR_TEMPLATE_LEN (sizeof(isrTemplate)) // I hate C
-#define ISR_COUNT (256)
-#define IDT_ARRAY_SIZE (sizeof(IDTEntry32_t)*ISR_COUNT)
+#define ISR_COUNT 256
 
-uint8_t SECTION_ATTR(.text.dynamic_isr#) isrArray[ISR_COUNT * ISR_TEMPLATE_LEN];
+typedef struct
+{
+    uint8_t push_opcode1; // 0x68
+    uint32_t push_operand1;
+    uint8_t push_opcode2; // 0x68
+    uint32_t push_operand2;
+    uint8_t ret_opcode; // 0xC3
+} PACKED_ATTR ISRTemplate_t;
+
+ISRTemplate_t SECTION_ATTR(.text.dynamic_isr #) isrArray[ISR_COUNT];
 IDTDescriptor32_t idtDescriptor;
 IDTEntry32_t idtArray[ISR_COUNT];
 
-CDECL_ATTR void generic_c_isr(IRQVectorNum_t vectorNumber, uint32_t errorCode)
+CDECL_ATTR void generic_c_isr(IRQVectorNum_t vectorNumber, uint32_t errorCode /*, InterruptSavedRegisters_t *regs */)
 {
-    if (IS_VEC_PIC_INTERRUPT(vectorNumber))
+    bool_t isPICIRQ = IS_VEC_PIC_INTERRUPT(vectorNumber);
+    uint8_t picIrqNum = 0;
+    bool_t isSpurious = 0;
+
+    // PIC8259 Prologue
+    if (isPICIRQ)
     {
-        uint8_t picIrqNum = vectorNumber - PIC8259_CUSTOM_IRQ_OFFSET;
-        bool_t isSpurious = pic8259_is_irq_spurious(picIrqNum);
-
-        // TODO: do something here
-
-        pic8259_send_eoi(picIrqNum, isSpurious);
+        picIrqNum = vectorNumber - PIC8259_CUSTOM_IRQ_OFFSET;
+        isSpurious = pic8259_is_irq_spurious(picIrqNum);
     }
-    else if (vectorNumber == SYSCALL_INTERRUPT)
+
+    // TODO: call installed handlers here
+
+    // PIC8259 Epilogue
+    if (isPICIRQ)
     {
-        // TODO: do something here
+        pic8259_send_eoi(picIrqNum, isSpurious);
     }
 }
 
@@ -41,14 +51,14 @@ CDECL_ATTR void load_kernel_idt()
     load_idt(&idtDescriptor);
 }
 
-void generate_kernel_idt(IDTDescriptor32_t* pDesc, IDTEntry32_t* pEntryList)
+void generate_kernel_idt(IDTDescriptor32_t *pDesc, IDTEntry32_t *pEntryList)
 {
-    pDesc->size = IDT_ARRAY_SIZE - 1;
+    pDesc->size = sizeof(idtArray) - 1;
     pDesc->offset = (uint32_t)pEntryList;
 
     for (size_t i = 0; i < ISR_COUNT; i++)
     {
-        void *offset = generate_isr_stub(i, LINKER_VAR(generic_asm_isr));
+        void *offset = set_isr_handler(i, LINKER_VAR(generic_asm_isr));
         pEntryList[i].offset_l = (uintptr_t)offset & 0xFFFF;
         pEntryList[i].offset_h = ((uintptr_t)offset >> 16) & 0xFFFF;
         pEntryList[i].reserved = 0;
@@ -57,17 +67,16 @@ void generate_kernel_idt(IDTDescriptor32_t* pDesc, IDTEntry32_t* pEntryList)
         pEntryList[i].options.GateType = Interrupt32Bit;
         pEntryList[i].segment = 0x8;
     }
-    
-    pEntryList[SYSCALL_INTERRUPT].options.DPL = 3; // Ring 3 should be able to raise this IRQ
-    pEntryList[SYSCALL_INTERRUPT].options.GateType = Trap32Bit;
-    //TODO: Make traps and faults Trap32Bit
+
+    // TODO: Make traps and faults Trap32Bit
 }
 
-static void *generate_isr_stub(IRQVectorNum_t vectorNumber, const void *const pRealHandler)
+static void *set_isr_handler(IRQVectorNum_t vectorNumber, const void *const pRealHandler)
 {
-    uint8_t *offset = &isrArray[vectorNumber * ISR_TEMPLATE_LEN];
-    memcpy(offset, isrTemplate, ISR_TEMPLATE_LEN);
-    *(uint32_t *)(&offset[1]) = vectorNumber;
-    *(uint32_t *)(&offset[6]) = (uint32_t)pRealHandler;
-    return (void *)offset;
+    isrArray[vectorNumber].push_opcode1 = 0x68;
+    isrArray[vectorNumber].push_operand1 = vectorNumber;
+    isrArray[vectorNumber].push_opcode2 = 0x68;
+    isrArray[vectorNumber].push_operand2 = (uint32_t)pRealHandler;
+    isrArray[vectorNumber].ret_opcode = 0xC3;
+    return &isrArray[vectorNumber];
 }
