@@ -1,12 +1,18 @@
 #pragma once
 #include <stdint.h>
 #include "utils.h"
+#include "interrupt.h"
 
-void pic8259_configure(uint8_t pic1IROffset, uint8_t pic2IROffset);
+typedef uint8_t PICIRQNum_t;
+typedef void (*PICInterruptHandlerFunc_t)(PICIRQNum_t picIrqNum);
+
+void pic8259_init();
+void pic8259_configure(bool_t isRealMode);
 uint16_t pic8259_get_disabled_irq_mask();
 void pic8259_set_disabled_irq_mask(uint16_t combinedIRQMask);
-void pic8259_send_eoi(uint8_t picIrqNum, bool_t isSpurious);
-bool_t pic8259_is_irq_spurious(uint8_t picIrqNum);
+void pic8259_send_eoi(PICIRQNum_t picIrqNum, bool_t isSpurious);
+bool_t pic8259_is_irq_spurious(PICIRQNum_t picIrqNum);
+void pic8259_install_interrupt_handler(PICIRQNum_t picIrqNum, PICInterruptHandlerFunc_t handler);
 
 /*
  * A0 in the datasheet refers to the last bit of the port address.
@@ -19,10 +25,8 @@ bool_t pic8259_is_irq_spurious(uint8_t picIrqNum);
 
 #define PIC8259_RM_PIC1_IRQ_OFFSET 0x08
 #define PIC8259_RM_PIC2_IRQ_OFFSET 0x70
-
-#define PIC8259_CUSTOM_IRQ_COUNT 16
-#define PIC8259_CUSTOM_IRQ_OFFSET 0x20
-#define IS_VEC_PIC_INTERRUPT(x) IS_IN_RANGE(x, PIC8259_CUSTOM_IRQ_OFFSET, PIC8259_CUSTOM_IRQ_OFFSET+PIC8259_CUSTOM_IRQ_COUNT)
+#define PIC8259_KERNEL_IRQ_OFFSET 0x20
+#define PIC8259_KERNEL_IRQ_COUNT 16
 
 // Bit field structs assume an LE system
 typedef union

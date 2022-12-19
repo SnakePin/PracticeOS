@@ -2,9 +2,8 @@
 #include <stddef.h>
 #include "interrupt.h"
 #include "utils.h"
-#include "drivers/pic8259.h"
 
-CDECL_ATTR void generic_c_isr(IRQVectorNum_t, uint32_t);
+CDECL_ATTR void generic_c_isr(IRQVectorNum_t, uint32_t, InterruptSavedRegisters_t *);
 static void *set_isr_handler(IRQVectorNum_t, void const *);
 extern const void *const generic_asm_isr; // Linker variable, don't modify or dereference it!
 
@@ -19,29 +18,26 @@ typedef struct
     uint8_t ret_opcode; // 0xC3
 } PACKED_ATTR ISRTemplate_t;
 
-ISRTemplate_t SECTION_ATTR(.text.dynamic_isr #) isrArray[ISR_COUNT];
-IDTDescriptor32_t idtDescriptor;
-IDTEntry32_t idtArray[ISR_COUNT];
+static ISRTemplate_t SECTION_ATTR(.text.dynamic_isr #) isrArray[ISR_COUNT];
+static IDTDescriptor32_t idtDescriptor;
+static IDTEntry32_t idtArray[ISR_COUNT];
+static InterruptHandlerFunc_t interruptHandlers[ISR_COUNT] = {0};
 
-CDECL_ATTR void generic_c_isr(IRQVectorNum_t vectorNumber, uint32_t errorCode /*, InterruptSavedRegisters_t *regs */)
+void install_interrupt_handler(IRQVectorNum_t vectorNumber, InterruptHandlerFunc_t handler)
 {
-    bool_t isPICIRQ = IS_VEC_PIC_INTERRUPT(vectorNumber);
-    uint8_t picIrqNum = 0;
-    bool_t isSpurious = 0;
-
-    // PIC8259 Prologue
-    if (isPICIRQ)
+    if (vectorNumber >= ISR_COUNT)
     {
-        picIrqNum = vectorNumber - PIC8259_CUSTOM_IRQ_OFFSET;
-        isSpurious = pic8259_is_irq_spurious(picIrqNum);
+        // TODO: log error here
+        return;
     }
+    interruptHandlers[vectorNumber] = handler;
+}
 
-    // TODO: call installed handlers here
-
-    // PIC8259 Epilogue
-    if (isPICIRQ)
+CDECL_ATTR void generic_c_isr(IRQVectorNum_t vectorNumber, uint32_t errorCode, InterruptSavedRegisters_t *regs)
+{
+    if (interruptHandlers[vectorNumber] != NULL)
     {
-        pic8259_send_eoi(picIrqNum, isSpurious);
+        interruptHandlers[vectorNumber](vectorNumber, errorCode, regs);
     }
 }
 

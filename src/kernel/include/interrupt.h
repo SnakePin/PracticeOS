@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include "utils.h"
 
-enum ExceptionInterrupts {
+enum ExceptionInterrupts
+{
     DivideByZeroFault = 0x00,
     DebugTrap = 0x01,
     NonMaskableInterrupt = 0x02,
@@ -29,7 +30,8 @@ enum ExceptionInterrupts {
     SecurityFault = 0x1E
 };
 
-enum IDTGateTypes {
+enum IDTGateTypes
+{
     TaskGate = 0x05,
     Interrupt16Bit = 0x06,
     Trap16Bit = 0x07,
@@ -53,10 +55,11 @@ typedef struct
     uint32_t eflags;
 } PACKED_ATTR InterruptSavedRegisters_t;
 
-typedef struct {
+typedef struct
+{
     uint16_t offset_l;
     uint16_t segment;
-    uint8_t  reserved;
+    uint8_t reserved;
     union
     {
         struct
@@ -71,15 +74,18 @@ typedef struct {
     uint16_t offset_h;
 } PACKED_ATTR IDTEntry32_t;
 
-typedef struct {
+typedef struct
+{
     uint16_t size;
     uint32_t offset;
 } PACKED_ATTR IDTDescriptor32_t;
 
 typedef uint8_t IRQVectorNum_t;
+typedef void (*InterruptHandlerFunc_t)(IRQVectorNum_t vectorNumber, uint32_t errorCode, InterruptSavedRegisters_t *regs);
 
-CDECL_ATTR void load_idt(void* idt);
+CDECL_ATTR void load_idt(void *idt);
 CDECL_ATTR void load_kernel_idt();
 CDECL_ATTR void disable_all_interrupts();
 CDECL_ATTR void enable_all_interrupts();
-void generate_kernel_idt(IDTDescriptor32_t* pDesc, IDTEntry32_t* pEntryList);
+void generate_kernel_idt(IDTDescriptor32_t *pDesc, IDTEntry32_t *pEntryList);
+void install_interrupt_handler(IRQVectorNum_t vectorNumber, InterruptHandlerFunc_t handler);

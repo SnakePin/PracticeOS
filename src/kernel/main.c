@@ -49,7 +49,8 @@ static char *itoa_custom(int num, int radix)
 void kmain()
 {
     // Interrupts are disabled on kmain() entry
-    pic8259_configure(PIC8259_CUSTOM_IRQ_OFFSET, PIC8259_CUSTOM_IRQ_OFFSET + 8);
+    pic8259_init();
+    pic8259_configure(FALSE);
     pic8259_set_disabled_irq_mask(0x0000); // Enable all IRs
     enable_all_interrupts();
     int_gate16_init(); // Gate for using real mode BIOS interrupts
