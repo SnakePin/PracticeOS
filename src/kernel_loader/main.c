@@ -18,10 +18,6 @@ CDECL_ATTR NORETURN_ATTR void jump_to_kernel(void *code, void* newStack, void *a
 #define MEM_RESERVED 0
 #define MEM_RESERVED_LEN 0x100000
 
-// Even though the first MiB has BIOS structures, there's a usable memory range
-#define MEM_USABLE_BELOW1MIB 0x1000 // First usable page
-#define MEM_USABLE_BELOW1MIB_LEN 0x7F000
-
 #define KERNEL_STACK_SIZE 0x100000
 
 static void *MapELFAndGetEntryPoint(uint8_t *pFile);
@@ -35,7 +31,7 @@ CDECL_ATTR void ldrmain(uint8_t bootDiskID, uint32_t bootPartitionLBA)
     paging_load_structure(pPagingStructure);
     for (size_t i = 0; i < PAGE_DIR_LENGTH; i++)
     {
-        pPagingStructure->directory[i] = ((PageDirectoryEntry_t)&pPagingStructure->tables[i]) | 3; // supervisor level, read/write, present
+        pPagingStructure->directory[i] = ((PageDirectoryEntry_t)&pPagingStructure->tables2D[i]) | 3; // supervisor level, read/write, present
     }
     paging_map(0, 0, MEM_BITMAP_PAGE_COUNT * PAGE_SIZE);
     paging_enable_paging(); // All allocatable pages(32MiB) are identity mapped from now on
@@ -60,9 +56,6 @@ CDECL_ATTR void ldrmain(uint8_t bootDiskID, uint32_t bootPartitionLBA)
 
     // Allocate a stack for the kernel
     physical_ptr_t kernelStack = memory_phy_allocate_aligned(KERNEL_STACK_SIZE);
-
-    // Free the loader and it's stack, make no allocations in the loader after this
-    memory_phy_free((physical_ptr_t)MEM_USABLE_BELOW1MIB, MEM_USABLE_BELOW1MIB_LEN);
 
     jump_to_kernel(entryPoint, (void*)kernelStack, (void *)newBitmap, (void *)MEM_BITMAP_LENGTH, (void *)pPagingStructure);
     __builtin_unreachable();

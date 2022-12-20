@@ -18,7 +18,7 @@ static MemoryACPIMapEntry_t ACPIMemoryMap[ACPI_MEMORY_MAP_LENGTH];
 MemoryBitmapValue_t *memory_phy_bitmap;
 size_t memory_phy_bitmap_count = 0;
 
-void memory_phy_init()
+void memory_phy_update_bmap()
 {
     update_memmap_acpi();
     resize_mem_bitmap();
@@ -80,12 +80,11 @@ static void resize_mem_bitmap()
     }
 
     // Allocate using the old bitmap
-    // TODO: virtual allocate here
     size_t oldBitmapSize = memory_phy_bitmap_count * sizeof(MemoryBitmapValue_t);
     void *oldBitmap = memory_phy_bitmap;
 
     size_t newBitmapSize = (newMaxPageCount / MEM_BITMAP_VALUE_PAGE_COUNT) * sizeof(MemoryBitmapValue_t);
-    void *newBitmap = (void *)memory_phy_allocate_aligned(newBitmapSize);
+    void *newBitmap = memory_virt_allocate(newBitmapSize);
 
     memset(newBitmap, 0, newBitmapSize);
     memcpy(newBitmap, oldBitmap, MIN(oldBitmapSize, newBitmapSize));
@@ -93,9 +92,7 @@ static void resize_mem_bitmap()
     // Swap the bitmap
     memory_phy_bitmap = newBitmap;
     memory_phy_bitmap_count = newMaxPageCount / MEM_BITMAP_VALUE_PAGE_COUNT;
-
-    // TODO: virtual free here
-    memory_phy_free((physical_ptr_t)oldBitmap, oldBitmapSize);
+    memory_virt_free(oldBitmap, oldBitmapSize);
 
     for (size_t i = 0; i < ACPIMemoryMapLength; i++)
     {

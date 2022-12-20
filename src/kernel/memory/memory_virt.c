@@ -4,11 +4,14 @@
 #include "memory/paging.h"
 #include "utils.h"
 
-// void memory_virt_reserve(void* pointer, size_t size);
-
 void memory_virt_init()
 {
-    // TODO
+    // TODO: implement
+}
+
+void memory_virt_reserve(void *ptr, size_t size)
+{
+    // TODO: implement
 }
 
 void memory_virt_free(void *ptr, size_t size)
@@ -20,14 +23,23 @@ void memory_virt_free(void *ptr, size_t size)
 
 void *memory_virt_allocate(size_t size)
 {
-    void *ptr = (void*)memory_phy_allocate_aligned(size);
+    void *ptr = (void *)memory_phy_allocate_aligned(size);
     if (ptr == PHY_NULL)
     {
         return NULL;
     }
-    paging_map((physical_ptr_t)ptr, (void *)ptr, size); // identity map
+    paging_map((physical_ptr_t)ptr, ptr, size); // TODO: implement
     paging_update_table();
-    return (void *)ptr;
+    return ptr;
+}
+
+void *memory_virt_create_phy_view(physical_ptr_t physicalAddress, size_t size)
+{
+    memory_phy_reserve(physicalAddress, size);
+    void *virtPtr = (void *)physicalAddress; // TODO: implement
+    paging_map(physicalAddress, virtPtr, size);
+    paging_update_table();
+    return virtPtr;
 }
 
 /*

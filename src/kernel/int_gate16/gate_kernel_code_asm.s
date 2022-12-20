@@ -3,7 +3,7 @@
 global int_gate16_jump_to_gate:function
 
 [SECTION .text]
-; void int_gate16_jump_to_gate(uint16_t gate16EIPAddr@ebp+8, uint16_t gate16Addr@ebp+12, uint16_t gate16CS@ebp+16, uint16_t gate16DS@ebp+20)
+; void int_gate16_jump_to_gate(uint16_t gate16SavedEIPAddr@ebp+8, uint16_t gate16Addr@ebp+12, uint16_t gate16CS@ebp+16, uint16_t gate16DS@ebp+20)
 int_gate16_jump_to_gate:
     push ebp
     mov ebp, esp

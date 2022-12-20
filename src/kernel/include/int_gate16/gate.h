@@ -2,15 +2,6 @@
 #include "interrupt.h"
 #include "gdt.h"
 
-#define INT_GATE16_EBDA_RESERVED 0x80000 //This is not defined by me, our free mem ends here
-#define INT_GATE16_ADDR 0x500
-#define INT_GATE16_EIP_ADDR 0x2500
-#define INT_GATE16_PARAM_ADDR (INT_GATE16_EIP_ADDR+4)
-#define INT_GATE16_GDT_ADDR (INT_GATE16_PARAM_ADDR+sizeof(INTGate16InternalParams_t))
-#define INT_GATE16_GDT_ARRAY_ADDR (INT_GATE16_GDT_ADDR+sizeof(GDTDescriptor32_t))
-#define INT_GATE16_FREE_MEM (INT_GATE16_GDT_ARRAY_ADDR+GDT_ARRAY_SIZE)
-#define INT_GATE16_FREE_MEM_LEN (INT_GATE16_EBDA_RESERVED-INT_GATE16_FREE_MEM)
-
 typedef struct
 {
     uint32_t eax;
@@ -31,6 +22,20 @@ typedef struct
     uint16_t pm_ds;
     uint8_t vectorNum;
 } PACKED_ATTR INTGate16InternalParams_t;
+
+typedef struct
+{
+    uint8_t pad1[0x500];
+    uint8_t gate16_code[0x2000];
+    uint32_t SavedEIP;
+    INTGate16InternalParams_t params;
+    GDTDescriptor32_t gdtDesc;
+    GDTEntry32_t gdtArray[GDT_ENTRY_COUNT];
+} PACKED_ATTR FirstMiBStructure_t;
+
+#define INT_GATE16_EBDA_RESERVED 0x80000 // This is not defined by me, our free mem ends here
+#define INT_GATE16_FREE_MEM (sizeof(FirstMiBStructure_t))
+#define INT_GATE16_FREE_MEM_LEN (INT_GATE16_EBDA_RESERVED - INT_GATE16_FREE_MEM)
 
 void int_gate16_init();
 void int_gate16_make_call(IRQVectorNum_t vectorNumber, const INTGate16Registers_t *inRegs, INTGate16Registers_t *outRegs);

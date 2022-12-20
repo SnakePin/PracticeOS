@@ -14,12 +14,7 @@ static void map_internal(physical_ptr_t phyAddress, size_t length, void *virtAdd
     physical_ptr_t currentPage = ADDR_TO_PAGE(virtAddr);
     for (size_t i = 0; i < LEN_TO_PAGE(length); i++)
     {
-        size_t dirIndex = currentPage / PAGE_TABLE_LENGTH;
-        size_t tableIndex = currentPage % PAGE_TABLE_LENGTH;
-
-        PageTableEntry_t *pageTablePointer = (PageTableEntry_t *)((physical_ptr_t)pGlobalPagingStructure->directory[dirIndex] & ~0xFFF);
-        pageTablePointer[tableIndex] = (currentPhysicalPage << 12) | attribute;
-
+        pGlobalPagingStructure->tables[currentPage] = (currentPhysicalPage << 12) | attribute;
         currentPage++;
         currentPhysicalPage++;
     }

@@ -15,11 +15,15 @@ typedef uint32_t PageTableEntry_t;
 typedef struct
 {
     PageDirectoryEntry_t directory[PAGE_DIR_LENGTH];
-    PageTableEntry_t tables[PAGE_TABLE_LENGTH][PAGE_DIR_LENGTH];
+    union
+    {
+        PageTableEntry_t tables2D[PAGE_TABLE_LENGTH][PAGE_DIR_LENGTH];
+        PageTableEntry_t tables[PAGE_TABLE_LENGTH * PAGE_DIR_LENGTH];
+    };
 } PACKED_ATTR PagingStructure_t;
 
 void paging_enable_paging();
 void paging_update_table();
-void paging_map(physical_ptr_t phyAddress, void* virtAddr, size_t length);
-void paging_unmap(void* virtAddr, size_t length);
+void paging_map(physical_ptr_t phyAddress, void *virtAddr, size_t length);
+void paging_unmap(void *virtAddr, size_t length);
 void paging_load_structure(PagingStructure_t *pPagingStruct);
