@@ -2,7 +2,7 @@
 all: kernel bootloader diskimg
 
 diskimg: kernel kernel_loader bootloader
-	dotnet-script mkdisk.csx
+	python3 mkdisk.py
 
 bootloader:
 	@$(MAKE) -j$(shell nproc) -C src/bootloader

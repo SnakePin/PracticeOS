@@ -11,8 +11,8 @@ extern MemoryBitmapValue_t mem_bitmap[];
 CDECL_ATTR NORETURN_ATTR void jump_to_kernel(void *code, void* newStack, void *arg1, void *arg2, void *arg3);
 
 // TODO: make this an actual file instead
-#define KERNEL_ELF_FILE_OFFSET 0x20000
-#define KERNEL_ELF_FILE_LEN_OFFSET 0x1FFFC
+#define KERNEL_ELF_FILE_OFFSET 0x4000
+#define KERNEL_ELF_FILE_LEN_OFFSET (KERNEL_ELF_FILE_OFFSET-4)
 
 // Has BIOS structures, loader and loader's stack
 #define MEM_RESERVED 0
