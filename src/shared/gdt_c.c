@@ -1,5 +1,5 @@
-#include "gdt.h"
-#include "utils.h"
+#include "shared/gdt.h"
+#include "shared/utils.h"
 
 GDTDescriptor32_t gdtDescriptor;
 GDTEntry32_t gdtArray[GDT_ENTRY_COUNT];

@@ -15,17 +15,17 @@ all: $(OUT)/vbr.bin $(OUT)/mbr.bin
 ensure_path:
 	@mkdir -p $(OUT)
 
+clean:
+	@rm -rf $(OUT)/* || true
+
 $(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s | ensure_path
 	$(AS) $(ASFLAGS) "$<" -o "$@"
 
 $(OUT)/vbr.elf: $(addprefix $(OUT)/, vbr_main.o vbr_trampoline.o utils.o)
-	$(LD) $(LDFLAGS) -T vbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^)
+	$(LD) -T vbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^) $(LDFLAGS)
 
 $(OUT)/mbr.elf: $(addprefix $(OUT)/, mbr_main.o utils.o)
-	$(LD) $(LDFLAGS) -T mbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^)
+	$(LD) -T mbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^) $(LDFLAGS)
 
 $(OBJCOPY_TARGETS): $(OUT)/%.bin: $(OUT)/%.elf
 	objcopy -S -O binary "$<" "$@"
-
-clean:
-	@rm -rf $(OUT)/* || true

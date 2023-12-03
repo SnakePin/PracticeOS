@@ -5,8 +5,9 @@
 #include "int_gate16/gate.h"
 #include "interrupt.h"
 #include "memory/memory.h"
-#include "memory/paging.h"
-#include "utils.h"
+
+#include "shared/paging.h"
+#include "shared/utils.h"
 
 static char buf[32];
 static char *itoa_custom(int num, int radix)

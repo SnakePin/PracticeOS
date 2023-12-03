@@ -1,8 +1,7 @@
 #include <stdint.h>
-#include "memory/paging.h"
-#include "memory/memory.h"
+#include "shared/memory.h"
+#include "shared/paging.h"
 
-CDECL_ATTR void paging_load_dir(void *pageDir);
 static void map_internal(physical_ptr_t phyAddress, size_t length, void *virtAddr, uint16_t attribute);
 
 PagingStructure_t *paging_pPagingStruct;

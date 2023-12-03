@@ -1,13 +1,8 @@
 #pragma once
-#include "utils.h"
+#include "shared/utils.h"
+#include "shared/memory.h"
 #include <stdint.h>
 #include <stddef.h>
-
-#define PAGE_SIZE 0x1000
-#define PHY_NULL 0
-
-//This must be changed if we want to support PAE in 32-bit mode
-typedef uintptr_t physical_ptr_t;
 
 void memory_phy_init();
 physical_ptr_t memory_phy_allocate_aligned(size_t size);

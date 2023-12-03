@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "utils.h"
-#include "memory/memory.h"
+#include "shared/utils.h"
+#include "shared/memory.h"
 
 #define PAGE_SIZE 0x1000
 #define PAGE_DIR_LENGTH 1024
@@ -22,8 +22,12 @@ typedef struct
     };
 } PACKED_ATTR PagingStructure_t;
 
-void paging_enable_paging();
 void paging_update_table();
 void paging_map(physical_ptr_t phyAddress, void *virtAddr, size_t length);
 void paging_unmap(void *virtAddr, size_t length);
 void paging_load_structure(PagingStructure_t *pPagingStruct);
+void paging_restore_tables(void *virtAddr, size_t length, PageTableEntry_t *buffer);
+size_t paging_save_tables(void *virtAddr, size_t length, PageTableEntry_t *buffer, size_t bufferSize);
+
+CDECL_ATTR void paging_enable_paging();
+CDECL_ATTR void paging_load_dir(void *pageDir);

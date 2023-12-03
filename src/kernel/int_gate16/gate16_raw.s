@@ -78,7 +78,7 @@ trampoline_to_kernel:
     call disable_all_interrupts
     mov di, word [INT_GATE16_PARAM_ADDR + g16p_gdt_addr]
     lgdt [di]
-    ; Enable protected mode, will invalidate all segments, this might also enable paging
+    ; Enable protected mode, will invalidate all segments, this will also enable paging
     mov bx, word [SAVED_GATE16_DS]
     mov eax, dword [SAVED_CR0_VAR]
     mov cr0, eax

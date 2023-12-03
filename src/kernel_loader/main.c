@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include "lba_disk.h"
-#include "utils.h"
 #include "elf.h"
-#include "memory/paging.h"
 #include "memory/memory.h"
 #include "memory/internal.h"
+
+#include "shared/utils.h"
+#include "shared/paging.h"
 
 extern MemoryBitmapValue_t mem_bitmap[];
 
@@ -42,6 +43,7 @@ CDECL_ATTR void ldrmain(uint8_t bootDiskID, uint32_t bootPartitionLBA)
     uint8_t *pPhyKernelElf = (uint8_t *)memory_phy_allocate_aligned(fileSize);
     lba_read_from_disk(bootDiskID, bootPartitionLBA, KERNEL_ELF_FILE_OFFSET, fileSize, pPhyKernelElf);
     void *entryPoint = MapELFAndGetEntryPoint(pPhyKernelElf);
+    
     // ELF parsing is done, free the memory
     memory_phy_free((physical_ptr_t)pPhyKernelElf, fileSize);
 
@@ -50,14 +52,15 @@ CDECL_ATTR void ldrmain(uint8_t bootDiskID, uint32_t bootPartitionLBA)
         return; // ELF Parsing failed
     }
 
-    size_t bitmapSize = MEM_BITMAP_LENGTH * sizeof(MemoryBitmapValue_t);
-    physical_ptr_t newBitmap = memory_phy_allocate_aligned(bitmapSize);
-    memcpy((void *)newBitmap, mem_bitmap, bitmapSize);
-
     // Allocate a stack for the kernel
     physical_ptr_t kernelStack = memory_phy_allocate_aligned(KERNEL_STACK_SIZE);
+    void* kernelStackEnd = (void*)(kernelStack+KERNEL_STACK_SIZE);
 
-    jump_to_kernel(entryPoint, (void*)kernelStack, (void *)newBitmap, (void *)MEM_BITMAP_LENGTH, (void *)pPagingStructure);
+    // Copy memory bitmap
+    physical_ptr_t mem_bitmap_copy = memory_phy_allocate_aligned(MEM_BITMAP_LENGTH);
+    memcpy((void *)mem_bitmap_copy, mem_bitmap, MEM_BITMAP_LENGTH);
+
+    jump_to_kernel(entryPoint, kernelStackEnd, (void *)mem_bitmap_copy, (void *)MEM_BITMAP_LENGTH, (void *)pPagingStructure);
     __builtin_unreachable();
 }
 

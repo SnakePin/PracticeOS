@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "utils.h"
+#include "shared/utils.h"
 
 #define ELF_NIDENT 16
 #define ELF_MAGIC "\177ELF"

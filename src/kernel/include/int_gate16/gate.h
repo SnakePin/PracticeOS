@@ -1,6 +1,6 @@
 #pragma once
 #include "interrupt.h"
-#include "gdt.h"
+#include "shared/gdt.h"
 
 typedef struct
 {

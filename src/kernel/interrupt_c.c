@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "interrupt.h"
-#include "utils.h"
+#include "shared/utils.h"
 
 CDECL_ATTR void generic_c_isr(IRQVectorNum_t, uint32_t, InterruptSavedRegisters_t *);
 static void *set_isr_handler(IRQVectorNum_t, void const *);

@@ -2,9 +2,10 @@
 #include "int_gate16/gate.h"
 #include "memory/memory.h"
 #include "interrupt.h"
-#include "utils.h"
-#include "gdt.h"
-#include "memory/paging.h"
+#include "shared/utils.h"
+
+#include "shared/paging.h"
+#include "shared/utils.h"
 
 extern const void *const __int_gate16_raw;      // Linker variable, don't modify or dereference it!
 extern const void *const __int_gate16_raw_size; // Linker variable, don't modify or dereference it!

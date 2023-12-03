@@ -1,7 +1,7 @@
 [BITS 32]
 
 global paging_load_dir:function
-global paging_enable:function
+global paging_enable_paging:function
 
 [SECTION .text]
 ; void paging_load_dir(void* pageDirectory@esp+8)
@@ -12,8 +12,8 @@ paging_load_dir:
     pop eax
     ret
 
-; void paging_enable()
-paging_enable:
+; void paging_enable_paging()
+paging_enable_paging:
     push eax
     mov eax, cr0
     or eax, 0x80000000

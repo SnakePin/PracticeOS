@@ -1,12 +1,11 @@
 #include <stddef.h>
-#include "memory/paging.h"
 #include "memory/memory.h"
 #include "memory/internal.h"
 #include "int_gate16/gate.h"
+#include "shared/paging.h"
 
 #define EFLAGS_CF_MASK 0x1
 
-static bool_t set_mem_bitmap_pages(physical_ptr_t firstPage, size_t count, bool_t isReserved);
 static void resize_mem_bitmap();
 static void update_memmap_acpi();
 static size_t ACPIMemoryMapLength = 0;
@@ -27,7 +26,7 @@ void memory_phy_update_bmap()
 physical_ptr_t memory_phy_allocate_aligned(size_t size)
 {
     size_t pageCount = LEN_TO_PAGE(size);
-    size_t contiguosCounter = 0;
+    size_t contiguousCounter = 0;
     for (size_t i = 0; i < memory_phy_bitmap_count; i++)
     {
         for (size_t j = 0; j < MEM_BITMAP_VALUE_PAGE_COUNT; j++)
@@ -35,17 +34,17 @@ physical_ptr_t memory_phy_allocate_aligned(size_t size)
             MemoryBitmapValue_t mask = 1 << j;
             if (!(memory_phy_bitmap[i] & mask))
             {
-                contiguosCounter++;
+                contiguousCounter++;
             }
             else
             {
-                contiguosCounter = 0;
+                contiguousCounter = 0;
             }
 
-            if (contiguosCounter == pageCount)
+            if (contiguousCounter == pageCount)
             {
                 physical_ptr_t firstPage = (i * MEM_BITMAP_VALUE_PAGE_COUNT) + j - (pageCount - 1);
-                set_mem_bitmap_pages(firstPage, pageCount, TRUE);
+                memory_bitmap_set_range(memory_phy_bitmap, memory_phy_bitmap_count, firstPage, pageCount, TRUE);
                 return firstPage * PAGE_SIZE;
             }
         }
@@ -56,12 +55,12 @@ physical_ptr_t memory_phy_allocate_aligned(size_t size)
 
 void memory_phy_free(physical_ptr_t pointer, size_t size)
 {
-    set_mem_bitmap_pages(ADDR_TO_PAGE(pointer), LEN_TO_PAGE(size), FALSE);
+    memory_bitmap_set_range(memory_phy_bitmap, memory_phy_bitmap_count, ADDR_TO_PAGE(pointer), LEN_TO_PAGE(size), FALSE);
 }
 
 void memory_phy_reserve(physical_ptr_t pointer, size_t size)
 {
-    set_mem_bitmap_pages(ADDR_TO_PAGE(pointer), LEN_TO_PAGE(size), TRUE);
+    memory_bitmap_set_range(memory_phy_bitmap, memory_phy_bitmap_count, ADDR_TO_PAGE(pointer), LEN_TO_PAGE(size), TRUE);
 }
 
 static void resize_mem_bitmap()
@@ -74,8 +73,8 @@ static void resize_mem_bitmap()
             // Skip non-usable pages
             continue;
         }
-        //+1 cause we need the length
-        physical_ptr_t pageCount = ADDR_TO_PAGE(ACPIMemoryMap[i].BaseAddress + ACPIMemoryMap[i].Length) + 1;
+
+        physical_ptr_t pageCount = LEN_TO_PAGE(ACPIMemoryMap[i].BaseAddress + ACPIMemoryMap[i].Length);
         newMaxPageCount = MAX(newMaxPageCount, pageCount);
     }
 
@@ -132,32 +131,4 @@ static void update_memmap_acpi()
         inRegs.ebx = outRegs.ebx; // Continuation value
 
     } while (outRegs.ebx != 0); // EBX==0 means that we just got the last entry
-}
-
-static bool_t set_mem_bitmap_pages(physical_ptr_t firstPage, size_t count, bool_t isReserved)
-{
-    size_t totalPageCount = memory_phy_bitmap_count * MEM_BITMAP_VALUE_PAGE_COUNT;
-    if (firstPage >= totalPageCount)
-    {
-        return FALSE;
-    }
-    for (physical_ptr_t currentPage = firstPage; currentPage < (firstPage + count); currentPage++)
-    {
-        if (currentPage >= totalPageCount)
-        {
-            break;
-        }
-        size_t bitmapIndex = currentPage / MEM_BITMAP_VALUE_PAGE_COUNT;
-        size_t bitIndex = currentPage % MEM_BITMAP_VALUE_PAGE_COUNT;
-
-        if (isReserved)
-        {
-            memory_phy_bitmap[bitmapIndex] |= ((MemoryBitmapValue_t)1 << bitIndex);
-        }
-        else
-        {
-            memory_phy_bitmap[bitmapIndex] &= ~((MemoryBitmapValue_t)1 << bitIndex);
-        }
-    }
-    return TRUE;
 }

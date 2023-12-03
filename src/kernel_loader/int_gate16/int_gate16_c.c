@@ -1,6 +1,6 @@
 #include "int_gate16/gate.h"
-#include "gdt.h"
-#include "utils.h"
+#include "shared/gdt.h"
+#include "shared/utils.h"
 
 CDECL_ATTR void int_gate16_jump_to_gate(uint16_t gate16CS, uint16_t gate16DS);
 

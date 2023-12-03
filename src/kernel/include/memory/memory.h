@@ -1,12 +1,7 @@
 #pragma once
-#include "utils.h"
-#include <stdint.h>
+#include "shared/utils.h"
+#include "shared/memory.h"
 #include <stddef.h>
-
-#define PHY_NULL 0
-
-//This must be changed if we want to support PAE in 32-bit mode
-typedef uintptr_t physical_ptr_t;
 
 void memory_phy_update_bmap();
 physical_ptr_t memory_phy_allocate_aligned(size_t size);

@@ -1,8 +1,9 @@
 #include "memory/memory.h"
 #include "memory/internal.h"
 #include "int_gate16/gate.h"
-#include "memory/paging.h"
-#include "utils.h"
+
+#include "shared/paging.h"
+#include "shared/utils.h"
 
 void memory_virt_init()
 {

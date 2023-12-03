@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "utils.h"
+#include "shared/utils.h"
 
 #define GDT_ENTRY_COUNT 5
 #define GDT_ARRAY_SIZE (sizeof(GDTEntry32_t) * GDT_ENTRY_COUNT)

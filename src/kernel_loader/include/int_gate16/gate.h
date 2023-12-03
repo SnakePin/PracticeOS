@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "utils.h"
+#include "shared/utils.h"
 
 #define INT_GATE16_EBDA_RESERVED 0x80000 //This is not defined by me, our free mem ends here
 #define INT_GATE16_PARAM_ADDR 0x7000

@@ -9,9 +9,6 @@
 #define ACPI_E820_SIGNATURE 0x534D4150 //'SMAP'
 #define ACPI_MEMORY_MAP_LENGTH 128
 
-typedef uint8_t MemoryBitmapValue_t;
-#define MEM_BITMAP_VALUE_PAGE_COUNT (sizeof(MemoryBitmapValue_t)*8)
-
 typedef struct {
     uint64_t BaseAddress;
     uint64_t Length;

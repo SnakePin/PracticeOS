@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "utils.h"
+#include "shared/utils.h"
 #include "interrupt.h"
 
 typedef uint8_t PICIRQNum_t;

@@ -133,7 +133,7 @@ enable_all_interrupts:
 trampoline_to_kernel:
     call disable_all_interrupts
     lgdt [SAVED_GDT_VAR]
-    ; Enable protected mode, will invalidate all segments, this might also enable paging
+    ; Enable protected mode, will invalidate all segments, this will also enable paging
     mov bx, word [SAVED_GATE16_DS]
     mov eax, dword [SAVED_CR0_VAR]
     mov cr0, eax
