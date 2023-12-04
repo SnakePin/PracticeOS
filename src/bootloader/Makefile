@@ -14,9 +14,6 @@ all: $(OUT)/vbr.bin $(OUT)/mbr.bin
 clean:
 	@rm -rf $(OUT)/* || true
 
-clean:
-	@rm -rf $(OUT)/* || true
-
 $(OUT)/%.s.o: %.s
 	@mkdir -p $(@D)
 	$(AS) $(ASFLAGS) "$<" -o "$@"

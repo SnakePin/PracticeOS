@@ -11,7 +11,7 @@ ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align -L../../out/shared/ -l:libshared.a
 
 SOURCES := $(wildcard *.s drivers/*.s memory/*.s *.c drivers/*.c memory/*.c *.cpp drivers/*.cpp memory/*.cpp) \
-			int_gate16/gate_kernel_code_c.c int_gate16/gate_kernel_code_asm.s int_gate16/gate16_embed.s
+			int_gate16/int_gate16.c int_gate16/int_gate16.s int_gate16/gate16_embed.s
 OBJS := $(patsubst %,$(OUT)/%.o,$(SOURCES))
 
 # Phony targets
