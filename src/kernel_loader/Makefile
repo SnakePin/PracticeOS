@@ -1,37 +1,41 @@
 OUT			= ../../out/kernel_loader
-SRC			= .
 AS			= nasm
 LD			= ld
 CC			= gcc
-CFLAGS		= -m32 -ffreestanding -nostdlib -c -std=c11 -pedantic -Wall -gdwarf-2
+CXX			= g++
+
+INCLUDE		= include ../shared/include
+CFLAGS		= -c -m32 -ffreestanding -nostdlib -std=c11 -pedantic -Wall -gdwarf-2 $(INCLUDE:%=-I%)
+CPPFLAGS	= -c -m32 -ffreestanding -nostdlib -std=c++17 -pedantic -Wall -gdwarf-2 $(INCLUDE:%=-I%)
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align -L../../out/shared/ -l:libshared.a
-INCLUDE		= $(SRC)/include ../shared/include
 
-ASM_OBJS	= entry.o int_gate16/int_gate16_asm.o jump_to_code.o
-C_OBJS		= main.o int_gate16/int_gate16_c.o lba_disk.o memory.o
-ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
-C_OBJ_TARGETS = $(addprefix $(OUT)/, $(C_OBJS))
+SOURCES := $(wildcard *.s *.c *.cpp int_gate16/*.s int_gate16/*.c int_gate16/*.cpp)
+OBJS := $(patsubst %,$(OUT)/%.o,$(SOURCES))
 
-.PHONY: all clean ensure_path
+# Phony targets
+.PHONY: all clean
 all: $(OUT)/kernel_loader.bin
-
-ensure_path:
-	@mkdir -p $(OUT)
-	@mkdir -p $(OUT)/int_gate16
-
 clean:
 	@rm -rf $(OUT)/* || true
 
-$(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s | ensure_path
+$(OUT)/%.cpp.o: %.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CPPFLAGS) "$<" -o "$@"
+
+$(OUT)/%.c.o: %.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) "$<" -o "$@"
+
+$(OUT)/%.s.o: %.s
+	@mkdir -p $(@D)
 	$(AS) $(ASFLAGS) "$<" -o "$@"
 
-$(C_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.c | ensure_path
-	$(CC) $(CFLAGS) "$<" -o "$@" $(INCLUDE:%=-I%)
-
-$(OUT)/kernel_loader.elf: $(ASM_OBJ_TARGETS) $(C_OBJ_TARGETS) | ensure_path
+$(OUT)/kernel_loader.elf: $(OBJS)
+	@mkdir -p $(@D)
 	$(LD) -T kernel_ldr_linker.ld -o "$@" $^ $(LDFLAGS)
 
-# This doesn't put the .bss in the output file, we should write an elf loader in the BL instead.
-$(OUT)/kernel_loader.bin: $(OUT)/kernel_loader.elf | ensure_path
-	objcopy -S -O binary "$<" "$@"
+# Should write an ELF loader in the BL instead.
+$(OUT)/%.bin: $(OUT)/%.elf
+	@mkdir -p $(@D)
+	objcopy --set-section-flags .bss=alloc,load,contents -S -O binary "$<" "$@"

@@ -5,27 +5,30 @@ LD			= ld
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align
 
-ASM_OBJS    = utils.o mbr_main.o vbr_main.o vbr_trampoline.o
-ASM_OBJ_TARGETS = $(addprefix $(OUT)/, $(ASM_OBJS))
-OBJCOPY_TARGETS = $(addprefix $(OUT)/, vbr.bin mbr.bin)
+VBR_OBJS := $(patsubst %,$(OUT)/%.o, vbr_main.s vbr_trampoline.s utils.s)
+MBR_OBJS := $(patsubst %,$(OUT)/%.o, mbr_main.s utils.s)
 
-.PHONY: all clean ensure_path
+# Phony targets
+.PHONY: all clean
 all: $(OUT)/vbr.bin $(OUT)/mbr.bin
-
-ensure_path:
-	@mkdir -p $(OUT)
+clean:
+	@rm -rf $(OUT)/* || true
 
 clean:
 	@rm -rf $(OUT)/* || true
 
-$(ASM_OBJ_TARGETS): $(OUT)/%.o: $(SRC)/%.s | ensure_path
+$(OUT)/%.s.o: %.s
+	@mkdir -p $(@D)
 	$(AS) $(ASFLAGS) "$<" -o "$@"
 
-$(OUT)/vbr.elf: $(addprefix $(OUT)/, vbr_main.o vbr_trampoline.o utils.o)
+$(OUT)/%.bin: $(OUT)/%.elf
+	@mkdir -p $(@D)
+	objcopy --set-section-flags .bss=alloc,load,contents -S -O binary "$<" "$@"
+
+$(OUT)/vbr.elf: $(VBR_OBJS)
+	@mkdir -p $(@D)
 	$(LD) -T vbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^) $(LDFLAGS)
 
-$(OUT)/mbr.elf: $(addprefix $(OUT)/, mbr_main.o utils.o)
+$(OUT)/mbr.elf: $(MBR_OBJS)
+	@mkdir -p $(@D)
 	$(LD) -T mbr_linker.ld -o "$(OUT)/$@" $(addprefix $(OUT)/, $^) $(LDFLAGS)
-
-$(OBJCOPY_TARGETS): $(OUT)/%.bin: $(OUT)/%.elf
-	objcopy -S -O binary "$<" "$@"
