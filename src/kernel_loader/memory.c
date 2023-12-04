@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include "memory/memory.h"
 #include "memory/internal.h"
-#include "int_gate16/gate.h"
+#include "simple_gate16/gate.h"
 #include "shared/paging.h"
 
 #define EFLAGS_CF_MASK 0x1

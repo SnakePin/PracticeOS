@@ -10,7 +10,7 @@ CPPFLAGS	= -c -m32 -ffreestanding -nostdlib -std=c++17 -pedantic -Wall -gdwarf-2
 ASFLAGS		= -f elf32 -gdwarf
 LDFLAGS		= --warn-section-align -L../../out/shared/ -l:libshared.a
 
-SOURCES := $(wildcard *.s *.c *.cpp int_gate16/*.s int_gate16/*.c int_gate16/*.cpp)
+SOURCES := $(wildcard *.s *.c *.cpp simple_gate16/*.s simple_gate16/*.c simple_gate16/*.cpp)
 OBJS := $(patsubst %,$(OUT)/%.o,$(SOURCES))
 
 # Phony targets

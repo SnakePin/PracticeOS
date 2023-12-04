@@ -1,4 +1,4 @@
-#include "int_gate16/gate.h"
+#include "simple_gate16/gate.h"
 #include "shared/gdt.h"
 #include "shared/utils.h"
 

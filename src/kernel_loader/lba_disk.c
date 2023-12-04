@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "shared/utils.h"
-#include "int_gate16/gate.h"
+#include "simple_gate16/gate.h"
 
 #define EFLAGS_CF_MASK 0x1
 #define LBA_SECTOR_SIZE 512
